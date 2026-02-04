@@ -4,6 +4,7 @@
   "description": "Meeting Plunger Backend - Python/FastAPI service",
   "private": true,
   "scripts": {
+    "test": "pytest -v",
     "lint": "ruff check .",
     "format": "ruff format ."
   }

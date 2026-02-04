@@ -12,6 +12,8 @@
     "e2e:debug": "cd e2e && pnpm test:debug",
     "e2e:install": "cd e2e && pnpm install",
     "test": "pnpm e2e",
+    "test:client": "cd client && make test",
+    "test:backend": "cd backend && pnpm test",
     "dev": "pnpm sut",
     "lint": "pnpm lint:client && pnpm lint:backend && pnpm lint:e2e",
     "lint:client": "cd client && make lint",

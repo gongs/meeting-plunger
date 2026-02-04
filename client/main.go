@@ -21,37 +21,10 @@ func main() {
 }
 
 func startHTTPServer() {
-	http.HandleFunc("/", handleRoot)
-	http.HandleFunc("/health", handleHealth)
+	http.HandleFunc("/", HandleRoot)
+	http.HandleFunc("/health", HandleHealth)
 
 	port := ":3000"
 	fmt.Printf("Starting local HTTP server on http://localhost%s\n", port)
 	log.Fatal(http.ListenAndServe(port, nil))
-}
-
-func handleRoot(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "text/html")
-	_, err := fmt.Fprintf(w, `
-		<!DOCTYPE html>
-		<html>
-		<head>
-			<title>Meeting Plunger</title>
-		</head>
-		<body>
-			<h1>Meeting Plunger</h1>
-			<p>Local client interface</p>
-		</body>
-		</html>
-	`)
-	if err != nil {
-		log.Printf("Error writing response: %v", err)
-	}
-}
-
-func handleHealth(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	_, err := fmt.Fprintf(w, `{"status": "healthy"}`)
-	if err != nil {
-		log.Printf("Error writing response: %v", err)
-	}
 }
