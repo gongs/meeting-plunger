@@ -32,6 +32,13 @@
             # Golang
             go
             
+            # Node.js and pnpm for e2e tests
+            nodejs_22
+            nodePackages.pnpm
+            
+            # Playwright dependencies
+            playwright-driver.browsers
+            
             # Development tools
             git
             
@@ -44,16 +51,24 @@
             echo "🚀 Meeting Plunger Development Environment"
             echo ""
             echo "Available tools:"
-            echo "  Python: $(python --version)"
-            echo "  Go:     $(go version)"
+            echo "  Python:   $(python --version)"
+            echo "  Go:       $(go version)"
+            echo "  Node.js:  $(node --version)"
+            echo "  pnpm:     $(pnpm --version)"
             echo ""
             echo "Project structure:"
             echo "  backend/  - Python FastAPI backend"
             echo "  client/   - Golang CLI and local HTTP service"
+            echo "  e2e/      - Playwright + Gherkin e2e tests"
             echo ""
             echo "Get started:"
             echo "  cd backend && uvicorn main:app --reload"
-            echo "  cd client && go run ."
+            echo "  cd client && go run . serve"
+            echo "  cd e2e && pnpm install && pnpm test"
+            
+            # Set Playwright browsers path
+            export PLAYWRIGHT_BROWSERS_PATH=${pkgs.playwright-driver.browsers}
+            export PLAYWRIGHT_SKIP_VALIDATE_HOST_REQUIREMENTS=true
           '';
         };
       }

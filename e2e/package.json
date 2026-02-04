@@ -1,0 +1,23 @@
+{
+  "name": "meeting-plunger-e2e",
+  "version": "1.0.0",
+  "description": "E2E tests for Meeting Plunger using Playwright and Cucumber",
+  "type": "module",
+  "scripts": {
+    "test": "cucumber-js",
+    "test:headed": "HEADED=true cucumber-js",
+    "test:debug": "PWDEBUG=1 cucumber-js",
+    "report": "node support/report.js"
+  },
+  "keywords": [
+    "playwright",
+    "cucumber",
+    "e2e",
+    "testing"
+  ],
+  "devDependencies": {
+    "@cucumber/cucumber": "^11.2.0",
+    "@playwright/test": "^1.51.1",
+    "playwright": "^1.51.1"
+  }
+}
