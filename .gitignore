@@ -50,11 +50,12 @@ result-*
 .direnv/
 
 # IDE
-.vscode/
 .idea/
 *.swp
 *.swo
 *~
+# Keep .vscode for shared settings
+!.vscode/
 
 # OS
 .DS_Store

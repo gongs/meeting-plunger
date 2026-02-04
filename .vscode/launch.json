@@ -1,0 +1,61 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Python: FastAPI",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "uvicorn",
+      "args": [
+        "main:app",
+        "--reload",
+        "--host",
+        "0.0.0.0",
+        "--port",
+        "8000"
+      ],
+      "cwd": "${workspaceFolder}/backend",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/backend"
+      },
+      "console": "integratedTerminal",
+      "justMyCode": true
+    },
+    {
+      "name": "Go: Client",
+      "type": "go",
+      "request": "launch",
+      "mode": "auto",
+      "program": "${workspaceFolder}/client",
+      "args": ["serve"],
+      "cwd": "${workspaceFolder}/client"
+    },
+    {
+      "name": "E2E: Debug Tests",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/e2e/node_modules/.bin/cucumber-js",
+      "args": [
+        "--import",
+        "steps/*.js",
+        "--import",
+        "support/*.js"
+      ],
+      "cwd": "${workspaceFolder}/e2e",
+      "env": {
+        "HEADED": "true",
+        "PWDEBUG": "1"
+      },
+      "console": "integratedTerminal"
+    }
+  ],
+  "compounds": [
+    {
+      "name": "Full Stack",
+      "configurations": ["Python: FastAPI", "Go: Client"],
+      "presentation": {
+        "order": 1
+      }
+    }
+  ]
+}

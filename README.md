@@ -89,7 +89,13 @@ pnpm test
 ├── backend/          # Python FastAPI backend
 ├── client/           # Golang CLI and local HTTP service
 ├── e2e/              # Playwright + Gherkin e2e tests
+├── .vscode/          # Shared VSCode settings
+│   ├── settings.json       # Workspace settings (Cucumber config)
+│   ├── extensions.json     # Recommended extensions
+│   ├── launch.json         # Debug configurations
+│   └── tasks.json          # Task runner
 ├── flake.nix         # Nix development environment
+├── package.json      # Root package scripts (pnpm sut, pnpm e2e)
 └── README.md
 ```
 
@@ -101,6 +107,7 @@ pnpm test
 - **Infrastructure**: Kubernetes (k8s)
 - **AI Integration**: OpenAI API
 - **Authentication**: Token-based auth over HTTPS
+- **IDE**: VSCode with Cucumber plugin configured (see `.vscode/`)
 
 ## Testing
 

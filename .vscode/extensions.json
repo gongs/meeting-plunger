@@ -1,0 +1,27 @@
+{
+  "recommendations": [
+    // Cucumber/Gherkin
+    "alexkrechik.cucumberautocomplete",
+    "cucumber.cucumber-official",
+    
+    // Playwright
+    "ms-playwright.playwright",
+    
+    // Python
+    "ms-python.python",
+    "ms-python.vscode-pylance",
+    "ms-python.black-formatter",
+    
+    // Go
+    "golang.go",
+    
+    // JavaScript/TypeScript
+    "dbaeumer.vscode-eslint",
+    "esbenp.prettier-vscode",
+    
+    // General
+    "editorconfig.editorconfig",
+    "streetsidesoftware.code-spell-checker",
+    "eamodio.gitlens"
+  ]
+}
