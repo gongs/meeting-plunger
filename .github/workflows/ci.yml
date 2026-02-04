@@ -1,0 +1,121 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Setup Node.js for pnpm and e2e tests
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 8
+
+      # Setup Python for backend
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      # Setup Go for client
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.22'
+
+      # Install dependencies
+      - name: Install root dependencies
+        run: pnpm install
+
+      - name: Install backend dependencies
+        working-directory: backend
+        run: pip install -r requirements.txt
+
+      - name: Install Go dependencies
+        working-directory: client
+        run: go mod download
+
+      - name: Install golangci-lint
+        run: |
+          curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.61.0
+          echo "$(go env GOPATH)/bin" >> $GITHUB_PATH
+
+      - name: Install e2e dependencies
+        working-directory: e2e
+        run: pnpm install
+
+      - name: Install Playwright browsers
+        working-directory: e2e
+        run: pnpm exec playwright install --with-deps
+
+      # Lint
+      - name: Lint all code
+        run: pnpm lint
+
+      # Unit tests
+      - name: Run backend unit tests
+        working-directory: backend
+        run: pnpm test
+
+      - name: Run client unit tests
+        working-directory: client
+        run: make test
+
+      # Start services and run e2e tests
+      - name: Start backend service
+        working-directory: backend
+        run: |
+          uvicorn main:app --host 0.0.0.0 --port 8000 &
+          echo $! > backend.pid
+        env:
+          PYTHONUNBUFFERED: '1'
+
+      - name: Start client service
+        working-directory: client
+        run: |
+          go build -o meeting-plunger .
+          ./meeting-plunger &
+          echo $! > client.pid
+
+      - name: Wait for services to be ready
+        run: |
+          timeout 30 bash -c 'until curl -f http://localhost:8000/health 2>/dev/null; do sleep 1; done'
+          timeout 30 bash -c 'until curl -f http://localhost:3000 2>/dev/null; do sleep 1; done'
+
+      - name: Run e2e tests
+        run: pnpm e2e
+
+      - name: Stop services
+        if: always()
+        run: |
+          if [ -f backend/backend.pid ]; then
+            kill $(cat backend/backend.pid) || true
+          fi
+          if [ -f client/client.pid ]; then
+            kill $(cat client/client.pid) || true
+          fi
+
+      # Upload artifacts on failure
+      - name: Upload e2e test results
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-test-results
+          path: |
+            e2e/reports/
+            e2e/test-results/
+          retention-days: 7
