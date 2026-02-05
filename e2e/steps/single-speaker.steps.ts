@@ -14,10 +14,8 @@ When(
   async function (this: CustomWorld, filename: string) {
     if (!this.page) throw new Error('Page is not initialized');
 
-    await start(this.page)
-      .clientPage()
-      .open()
-      .then((page) => page.uploadAudioFile(filename));
+    const homePage = await start(this.page).openHomePage();
+    await homePage.uploadAudioFile(filename);
   }
 );
 
@@ -26,6 +24,7 @@ Then(
   async function (this: CustomWorld, expectedTranscript: string) {
     if (!this.page) throw new Error('Page is not initialized');
 
-    await start(this.page).clientPage().verifyTranscript(expectedTranscript);
+    const homePage = await start(this.page).assumeHomePage();
+    await homePage.verifyTranscript(expectedTranscript);
   }
 );

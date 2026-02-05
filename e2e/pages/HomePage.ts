@@ -1,11 +1,18 @@
 import { Page, expect } from '@playwright/test';
 import path from 'path';
 
-export class ClientPage {
+export class HomePage {
   constructor(private page: Page) {}
 
   async open(): Promise<this> {
     await this.page.goto('http://localhost:3000');
+    return this;
+  }
+
+  async assume(): Promise<this> {
+    // Verify we're on the home page by checking for the main heading
+    const heading = this.page.locator('h1:has-text("Meeting Plunger")');
+    await expect(heading).toBeVisible({ timeout: 3000 });
     return this;
   }
 

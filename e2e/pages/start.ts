@@ -1,11 +1,19 @@
 import { Page } from '@playwright/test';
-import { ClientPage } from './ClientPage.js';
+import { HomePage } from './HomePage.js';
 
 export class Start {
   constructor(private page: Page) {}
 
-  clientPage(): ClientPage {
-    return new ClientPage(this.page);
+  async openHomePage(): Promise<HomePage> {
+    const homePage = new HomePage(this.page);
+    await homePage.open();
+    return homePage;
+  }
+
+  async assumeHomePage(): Promise<HomePage> {
+    const homePage = new HomePage(this.page);
+    await homePage.assume();
+    return homePage;
   }
 }
 
