@@ -89,16 +89,54 @@ if [ ! -d "$FRONTEND_GENERATED_DIR" ]; then
 fi
 
 # Backup the current generated client
-cp -r "$FRONTEND_GENERATED_DIR" "$TEMP_DIR/client.old"
+cp -r "$FRONTEND_GENERATED_DIR" "$TEMP_DIR/client.committed"
 
-# Regenerate frontend client
+# Generate a fresh client in a clean directory
+mkdir -p "$TEMP_DIR/fresh-client"
 cd "$FRONTEND_DIR"
+
+# Temporarily move the generated directory and generate fresh
+mv "$FRONTEND_GENERATED_DIR" "$TEMP_DIR/client.backup"
+mkdir -p "$FRONTEND_GENERATED_DIR"
 pnpm generate:client > /dev/null 2>&1
+cp -r "$FRONTEND_GENERATED_DIR" "$TEMP_DIR/client.fresh"
 
-# Compare all generated files
-DIFF_OUTPUT=$(diff -r -q "$TEMP_DIR/client.old" "$FRONTEND_GENERATED_DIR" 2>&1 || true)
+# Restore the original committed version
+rm -rf "$FRONTEND_GENERATED_DIR"
+mv "$TEMP_DIR/client.backup" "$FRONTEND_GENERATED_DIR"
 
-if [ -n "$DIFF_OUTPUT" ]; then
+# Compare committed files with freshly generated files
+DIFF_OUTPUT=$(diff -r -q "$TEMP_DIR/client.committed" "$TEMP_DIR/client.fresh" 2>&1 || true)
+
+# Check specifically for extra files in the committed version
+EXTRA_FILES=$(echo "$DIFF_OUTPUT" | grep "Only in $TEMP_DIR/client.committed" || true)
+
+# Check for other differences (modified files, missing files)
+OTHER_DIFFS=$(echo "$DIFF_OUTPUT" | grep -v "Only in $TEMP_DIR/client.committed" || true)
+
+if [ -n "$EXTRA_FILES" ]; then
+  echo ""
+  echo "❌ ERROR: Extra files found in frontend/src/generated/client/!"
+  echo ""
+  echo "The committed generated directory contains files that should not be there."
+  echo "Generated code should ONLY contain files created by the code generator."
+  echo ""
+  echo "📋 Extra files that should NOT be in the repository:"
+  echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+  echo "$EXTRA_FILES" | sed "s|Only in $TEMP_DIR/client.committed|Only in frontend/src/generated/client|g"
+  echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+  echo ""
+  echo "🔧 To fix this:"
+  echo "   1. Remove the extra files from frontend/src/generated/client/"
+  echo "   2. Run: nix develop -c pnpm generate:api"
+  echo "   3. Commit only the legitimate generated files"
+  echo ""
+  
+  # Note: Working directory is not modified (we kept the committed version intact)
+  exit 1
+fi
+
+if [ -n "$OTHER_DIFFS" ]; then
   echo ""
   echo "❌ ERROR: Frontend generated client is out of date!"
   echo ""
@@ -109,7 +147,7 @@ if [ -n "$DIFF_OUTPUT" ]; then
   echo ""
   echo "📋 Differences in frontend/src/generated/client/:"
   echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-  echo "$DIFF_OUTPUT"
+  echo "$OTHER_DIFFS"
   echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
   echo ""
   echo "🔧 To fix this:"
@@ -119,11 +157,7 @@ if [ -n "$DIFF_OUTPUT" ]; then
   echo "      - frontend/src/generated/client/**"
   echo ""
   
-  # Restore the old files so the working directory is not modified
-  cp "$TEMP_DIR/openapi.json.old" "$OPENAPI_FILE"
-  rm -rf "$FRONTEND_GENERATED_DIR"
-  cp -r "$TEMP_DIR/client.old" "$FRONTEND_GENERATED_DIR"
-  
+  # Note: Working directory is not modified (we kept the committed version intact)
   exit 1
 fi
 
