@@ -176,9 +176,27 @@ Always commit generated files:
 
 This ensures consistent API contracts across development, CI, and production.
 
+## Validation
+
+Ensure all generated files are up to date:
+
+```bash
+# Requires backend to be running
+nix develop -c pnpm sut:backend
+
+# Run validation (in another terminal)
+nix develop -c pnpm validate:api
+```
+
+This validates:
+1. Backend OpenAPI spec is fetched correctly
+2. Backend Go client is generated correctly
+3. Local-service OpenAPI spec is generated correctly
+4. Frontend TypeScript client is generated correctly
+
 ## Next Steps
 
-- [ ] Add CI validation to ensure generated files are up to date
+- [ ] Add CI validation workflow
 - [ ] Use generated backend client in `local-service/handlers.go`
 - [ ] Add more backend endpoints with type hints
 - [ ] Consider adding integration tests using generated clients

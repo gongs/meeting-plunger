@@ -199,6 +199,21 @@ The `pnpm generate:api` command handles everything:
 
 **Important:** Backend must be running for backend code generation to work.
 
+### Validation
+
+To ensure all generated files are up to date:
+
+```bash
+# Requires backend to be running
+nix develop -c pnpm validate:api
+```
+
+This validates:
+- Backend OpenAPI spec (fetched from FastAPI)
+- Backend Go client (generated from backend spec)
+- Local-service OpenAPI spec (generated from Go code)
+- Frontend TypeScript client (generated from local-service spec)
+
 ### Commit All Generated Files
 
 Always commit:
@@ -207,7 +222,7 @@ Always commit:
 - Local service OpenAPI spec (`local-service/generated/openapi.json`)
 - Frontend TypeScript client (`frontend/src/generated/client/`)
 
-**Note:** CI validation will be added in the future to ensure generated files are up to date.
+**Note:** Use `nix develop -c pnpm validate:api` to verify all generated files are in sync with source code.
 
 ### When Using Generated Clients
 

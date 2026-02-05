@@ -130,6 +130,11 @@ This generates:
 - **Go client** for local-service to call backend (oapi-codegen)
 - **TypeScript client** for frontend to call local-service (@hey-api/openapi-ts)
 
+Validate all generated files are up to date:
+```bash
+nix develop -c pnpm validate:api
+```
+
 Benefits: Type safety, no manual HTTP code, IntelliSense across all services.
 
 Full details: [docs/API_SHARING.md](docs/API_SHARING.md) | [docs/BIDIRECTIONAL_API_GENERATION.md](docs/BIDIRECTIONAL_API_GENERATION.md)
