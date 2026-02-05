@@ -11,7 +11,7 @@ Given(
 );
 
 When(
-  'I convert the audio file {string} into text',
+  'I convert the audio file {string} into transcript',
   async function (this: CustomWorld, filename: string) {
     if (!this.page) throw new Error('Page is not initialized');
 
@@ -32,10 +32,13 @@ When(
   }
 );
 
-Then('the text should be {string}', async function (this: CustomWorld, expectedText: string) {
-  if (!this.page) throw new Error('Page is not initialized');
+Then(
+  'the transcript should be {string}',
+  async function (this: CustomWorld, expectedTranscript: string) {
+    if (!this.page) throw new Error('Page is not initialized');
 
-  // Wait for and verify the transcription result
-  const result = this.page.locator('text=' + expectedText);
-  await expect(result).toBeVisible();
-});
+    // Wait for and verify the transcription result
+    const result = this.page.locator('text=' + expectedTranscript);
+    await expect(result).toBeVisible();
+  }
+);

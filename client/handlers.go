@@ -50,7 +50,7 @@ func HandleRoot(w http.ResponseWriter, r *http.Request) {
 		</head>
 		<body>
 			<h1>Meeting Plunger</h1>
-			<p>Convert audio recordings to text</p>
+			<p>Convert audio recordings to transcript</p>
 			
 			<div class="upload-form">
 				<h2>Upload Audio File</h2>
@@ -84,9 +84,9 @@ func HandleRoot(w http.ResponseWriter, r *http.Request) {
 							body: formData
 						});
 						
-						const data = await response.json();
-						resultDiv.textContent = data.text;
-						resultDiv.style.display = 'block';
+					const data = await response.json();
+					resultDiv.textContent = data.transcript;
+					resultDiv.style.display = 'block';
 					} catch (error) {
 						resultDiv.textContent = 'Error: ' + error.message;
 						resultDiv.style.display = 'block';
@@ -120,7 +120,7 @@ func HandleUpload(w http.ResponseWriter, r *http.Request) {
 	// TODO: Process the uploaded file and call backend API
 	// For now, return hardcoded response
 	w.Header().Set("Content-Type", "application/json")
-	_, err := fmt.Fprintf(w, `{"text": "Hello, how are you?"}`)
+	_, err := fmt.Fprintf(w, `{"transcript": "Hello, how are you?"}`)
 	if err != nil {
 		log.Printf("Error writing response: %v", err)
 	}
