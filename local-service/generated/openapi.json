@@ -43,7 +43,7 @@
         },
         "/transcribe": {
             "post": {
-                "description": "Accepts an audio file and returns its transcription",
+                "description": "Accepts an audio file and returns its transcription by calling the backend",
                 "consumes": [
                     "multipart/form-data"
                 ],

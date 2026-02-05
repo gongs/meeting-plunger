@@ -24,7 +24,7 @@ export class HealthService {
 export class TranscriptionService {
     /**
      * Transcribe audio file
-     * Accepts an audio file and returns its transcription
+     * Accepts an audio file and returns its transcription by calling the backend
      * @param data The data for the request.
      * @param data.file Audio file to transcribe
      * @returns main_TranscriptResponse OK
