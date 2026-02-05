@@ -94,7 +94,15 @@ cp "$FRONTEND_TYPES_FILE" "$TEMP_DIR/types.ts.old"
 # Regenerate frontend types
 cd "$FRONTEND_DIR"
 mkdir -p src/generated/client
-pnpm generate:client > /dev/null 2>&1
+
+# Check if running in CI or if nix is not available
+if [ "${CI:-false}" = "true" ] || ! command -v nix > /dev/null 2>&1; then
+  # Running in CI or without Nix - run pnpm directly
+  pnpm generate:client > /dev/null 2>&1
+else
+  # Running locally with Nix
+  nix develop -c pnpm generate:client > /dev/null 2>&1
+fi
 
 # Compare frontend types
 if ! diff -q "$TEMP_DIR/types.ts.old" "$FRONTEND_TYPES_FILE" > /dev/null 2>&1; then

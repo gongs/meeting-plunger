@@ -25,10 +25,27 @@ mkdir -p "$GENERATED_DIR"
 cd "$CLIENT_DIR"
 
 echo "Running swag init..."
-nix develop -c sh -c "\$(go env GOPATH)/bin/swag init \
-  --parseDependency \
-  --parseInternal \
-  --output \"$GENERATED_DIR\""
+
+# Check if running in CI or if nix is not available
+if [ "${CI:-false}" = "true" ] || ! command -v nix > /dev/null 2>&1; then
+  # Running in CI or without Nix - swag should be in PATH
+  SWAG_CMD="swag"
+  # Try GOPATH/bin if swag is not in PATH
+  if ! command -v swag > /dev/null 2>&1; then
+    SWAG_CMD="$(go env GOPATH)/bin/swag"
+  fi
+  
+  $SWAG_CMD init \
+    --parseDependency \
+    --parseInternal \
+    --output "$GENERATED_DIR"
+else
+  # Running locally with Nix
+  nix develop -c sh -c "\$(go env GOPATH)/bin/swag init \
+    --parseDependency \
+    --parseInternal \
+    --output \"$GENERATED_DIR\""
+fi
 
 # Keep only the swagger.json and rename it to openapi.json
 if [ -f "$GENERATED_DIR/swagger.json" ]; then
