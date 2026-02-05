@@ -5,7 +5,7 @@ export class HomePage {
   constructor(private page: Page) {}
 
   async open(): Promise<this> {
-    await this.page.goto('http://localhost:3000');
+    await this.page.goto('http://localhost:3001');
     return this;
   }
 
