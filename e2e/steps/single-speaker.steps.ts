@@ -15,6 +15,7 @@ When(
     if (!this.page) throw new Error('Page is not initialized');
 
     const homePage = await start(this.page).openHomePage();
+    await homePage.assume(); // Wait for Vue app to fully render
     await homePage.uploadAudioFile(filename);
   }
 );
