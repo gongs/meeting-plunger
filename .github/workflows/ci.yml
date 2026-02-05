@@ -120,7 +120,7 @@ jobs:
           
           echo "Waiting for client service..."
           for i in {1..30}; do
-            if curl -f http://localhost:3000 > /dev/null 2>&1; then
+            if curl -f http://localhost:3001/health > /dev/null 2>&1; then
               echo "Client is ready!"
               break
             fi
@@ -130,7 +130,7 @@ jobs:
           
           echo "Verifying services are responding..."
           curl -f http://localhost:8000/health
-          curl -f http://localhost:3000
+          curl -f http://localhost:3001/health
 
       - name: Run e2e tests
         working-directory: e2e
