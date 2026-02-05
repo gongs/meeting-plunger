@@ -54,6 +54,9 @@ jobs:
           curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.61.0
           echo "$(go env GOPATH)/bin" >> $GITHUB_PATH
 
+      - name: Install swag for OpenAPI generation
+        run: go install github.com/swaggo/swag/cmd/swag@latest
+
       - name: Install e2e dependencies
         working-directory: e2e
         run: pnpm install
@@ -61,6 +64,10 @@ jobs:
       - name: Install Playwright browsers
         working-directory: e2e
         run: pnpm exec playwright install --with-deps
+
+      # Validate generated files are up to date
+      - name: Validate OpenAPI spec is up to date
+        run: ./scripts/validate-api-generation.sh
 
       # Lint
       - name: Lint all code

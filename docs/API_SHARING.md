@@ -30,6 +30,11 @@ The Go client uses [swaggo/swag](https://github.com/swaggo/swag) to generate Ope
 nix develop -c pnpm generate:openapi
 ```
 
+**Validate (CI check):**
+```bash
+nix develop -c pnpm validate:openapi
+```
+
 **Example annotations in `client/handlers.go`:**
 ```go
 // HealthResponse represents the health check response
@@ -81,11 +86,17 @@ export interface TranscriptResponse {
    ```bash
    nix develop -c pnpm generate:openapi
    ```
-3. **Generate TypeScript types** (when set up):
+3. **Validate it's up to date** (optional, CI will check):
+   ```bash
+   nix develop -c pnpm validate:openapi
+   ```
+4. **Generate TypeScript types** (when set up):
    ```bash
    pnpm generate:types:frontend
    ```
-4. **Commit both** the Go code and generated files
+5. **Commit both** the Go code and generated files
+
+**Note:** CI will automatically validate that the generated OpenAPI spec matches the code. If you forget to regenerate after modifying the API, the CI build will fail with a helpful diff.
 
 ### When Using API Types
 

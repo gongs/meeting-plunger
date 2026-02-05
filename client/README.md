@@ -82,6 +82,20 @@ nix develop -c pnpm generate:openapi
 ./scripts/generate-client-openapi.sh
 ```
 
+#### Validate OpenAPI Spec
+
+Check if the generated spec is up to date (used in CI):
+
+```bash
+# From project root
+nix develop -c pnpm validate:openapi
+
+# Or run the script directly
+./scripts/validate-api-generation.sh
+```
+
+The validation will fail with a diff if the generated file doesn't match the code. This ensures the OpenAPI spec is always kept in sync with the API implementation.
+
 The generated `openapi.json` file is committed to the repository and can be used to:
 - Generate TypeScript types for the frontend
 - Generate API clients
