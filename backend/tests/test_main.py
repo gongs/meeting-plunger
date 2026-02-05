@@ -36,3 +36,13 @@ def test_cors_credentials():
     assert response.status_code == 200
     assert "access-control-allow-credentials" in response.headers
     assert response.headers["access-control-allow-credentials"] == "true"
+
+
+def test_transcribe_endpoint():
+    """Test the transcribe endpoint returns hardcoded transcript."""
+    # Create a dummy file
+    files = {"file": ("test.wav", b"dummy audio content", "audio/wav")}
+    response = client.post("/transcribe", files=files)
+    assert response.status_code == 200
+    data = response.json()
+    assert data["transcript"] == "Hello, how are you?"
