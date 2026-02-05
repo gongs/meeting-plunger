@@ -44,6 +44,7 @@ If the automated setup fails, see [docs/nix.md](docs/nix.md) for detailed manual
 
 - [Nix](https://nixos.org/download.html) with flakes enabled (installed by setup script)
 - (Optional) [direnv](https://direnv.net/) for automatic environment loading
+- **Windows users:** See [docs/WSL2_SETUP.md](docs/WSL2_SETUP.md) for WSL2 installation guide
 
 ### Getting Started
 
@@ -128,6 +129,7 @@ Full details: [docs/LINTING_AND_FORMATTING.md](docs/LINTING_AND_FORMATTING.md)
 
 - [`.cursor/rules/general.mdc`](.cursor/rules/general.mdc) - **Essential commands & workflow**
 - [docs/nix.md](docs/nix.md) - Nix environment setup (manual installation)
+- [docs/WSL2_SETUP.md](docs/WSL2_SETUP.md) - WSL2 setup for Windows users ([中文版](docs/WSL2_SETUP.zh-CN.md))
 - [docs/QUICK_START.md](docs/QUICK_START.md) - Quick start guide
 - [docs/VSCODE_SETUP.md](docs/VSCODE_SETUP.md) - VSCode + Cucumber setup
 - [docs/VERIFICATION.md](docs/VERIFICATION.md) - Setup verification
