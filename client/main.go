@@ -7,6 +7,22 @@ import (
 	"os"
 )
 
+// @title Meeting Plunger Client API
+// @version 1.0
+// @description Client API server for Meeting Plunger - bridges frontend and backend
+// @termsOfService http://swagger.io/terms/
+
+// @contact.name API Support
+// @contact.url https://github.com/terryyin/meeting-plunger
+// @contact.email support@example.com
+
+// @license.name MIT
+// @license.url https://opensource.org/licenses/MIT
+
+// @host localhost:3001
+// @BasePath /
+// @schemes http
+
 func main() {
 	// Parse command line arguments
 	if len(os.Args) > 1 && os.Args[1] == "serve" {

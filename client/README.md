@@ -62,7 +62,32 @@ The client API server runs on port 3001 and:
 - Communicates with the backend API
 - Returns transcription results
 
-## Endpoints
+## API Documentation
+
+### OpenAPI Specification
+
+The client API is documented using OpenAPI/Swagger. The specification is automatically generated from code annotations using [swaggo/swag](https://github.com/swaggo/swag).
+
+**Generated spec:** `client/generated/openapi.json`
+
+#### Regenerate OpenAPI Spec
+
+After modifying API endpoints or their annotations:
+
+```bash
+# From project root
+nix develop -c pnpm generate:openapi
+
+# Or run the script directly
+./scripts/generate-client-openapi.sh
+```
+
+The generated `openapi.json` file is committed to the repository and can be used to:
+- Generate TypeScript types for the frontend
+- Generate API clients
+- View in Swagger UI or other OpenAPI tools
+
+### Endpoints
 
 - **GET /health** - Health check endpoint
 - **POST /upload** - Upload audio file for transcription (returns hardcoded response for now)

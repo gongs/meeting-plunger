@@ -16,6 +16,10 @@ All documentation for the Meeting Plunger project.
 
 ## Additional Documentation
 
+- [ARCHITECTURE.md](ARCHITECTURE.md) - System architecture and component overview
+- [API_SHARING.md](API_SHARING.md) - API type sharing between Go and TypeScript
+- [LINTING_AND_FORMATTING.md](LINTING_AND_FORMATTING.md) - Code quality standards
+- [UNIT_TESTING.md](UNIT_TESTING.md) - Unit testing guide
 - [Main README](../README.md) - Project overview
 - [E2E Tests](../e2e/README.md) - E2E testing with Playwright + Cucumber
 - [VSCode Settings](../.vscode/README.md) - VSCode configuration details
