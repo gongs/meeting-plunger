@@ -34,6 +34,7 @@
             gotools  # Includes goimports
             gopls    # Go language server (for IDE support)
             air  # Go live reload
+            oapi-codegen  # OpenAPI code generator for Go
             
             # Node.js and pnpm for e2e tests
             nodejs_22

@@ -1,23 +1,74 @@
 # API Type Sharing
 
-This document describes how API definitions are shared between the Go local-service and TypeScript frontend.
+This document describes how API definitions are shared across all services in the Meeting Plunger project.
 
 ## Overview
 
-The Meeting Plunger project uses OpenAPI/Swagger to maintain a single source of truth for API types. The Go local-service generates an OpenAPI specification from code annotations, which can then be used to generate TypeScript types for the frontend.
+The Meeting Plunger project uses OpenAPI/Swagger to maintain a single source of truth for API types across three services:
+- **Backend (Python/FastAPI)** - Core transcription service
+- **Local Service (Go)** - Client API bridge
+- **Frontend (TypeScript/Vue)** - Web UI
+
+Code generation flows bidirectionally to ensure type safety everywhere.
 
 ## Architecture
+
+### Local Service → Frontend
 
 ```
 Go Local Service (handlers.go)
   ↓ swag annotations
   ↓ swag init
 OpenAPI Spec (local-service/generated/openapi.json)
-  ↓ openapi-typescript
+  ↓ @hey-api/openapi-ts
 TypeScript Client (frontend/src/generated/client/)
 ```
 
+### Backend → Local Service
+
+```
+Python Backend (main.py)
+  ↓ FastAPI /openapi.json
+OpenAPI Spec (backend/generated/openapi.json)
+  ↓ oapi-codegen
+Go Client (local-service/generated/backend_client/)
+```
+
 ## Current Setup
+
+### Backend → Go Client
+
+The Python FastAPI backend provides an OpenAPI 3.0 specification at `/openapi.json`. This is fetched and used to generate a type-safe Go client for the local-service.
+
+**Location:** `backend/generated/openapi.json` → `local-service/generated/backend_client/`
+
+**Generate:**
+```bash
+nix develop -c pnpm generate:api
+```
+
+**Toolchain:**
+- [FastAPI](https://fastapi.tiangolo.com/) - Automatically generates OpenAPI 3.0 from Python type hints
+- [oapi-codegen](https://github.com/deepmap/oapi-codegen) - Generates Go client from OpenAPI 3.0
+
+**Example backend code:**
+```python
+@app.post("/transcribe")
+async def transcribe(file: UploadFile = File(...)):
+    """Transcribe audio file."""
+    return {"transcript": "Hello, how are you?"}
+```
+
+**Generated Go client usage:**
+```go
+import "meeting-plunger/local-service/generated/backendclient"
+
+// Create client
+client, err := backendclient.NewClient("http://localhost:8000")
+
+// Type-safe API call
+resp, err := client.PostTranscribe(ctx, file)
+```
 
 ### Go Local Service → OpenAPI
 
@@ -123,30 +174,66 @@ export class TranscriptionService {
 
 ### When Adding/Modifying API Endpoints
 
-1. **Update Go handlers** with swag annotations in `local-service/handlers.go` or `local-service/main.go`
-2. **Regenerate both OpenAPI spec and TypeScript types:**
+**For Backend endpoints:**
+1. **Update Python code** in `backend/main.py` with type hints
+2. **Ensure backend is running** (`nix develop -c pnpm sut:backend`)
+3. **Regenerate all API code:**
    ```bash
    nix develop -c pnpm generate:api
    ```
-   This single command:
-   - Generates `local-service/generated/openapi.json` from Go code
-   - Converts Swagger 2.0 to OpenAPI 3.0
-   - Generates `frontend/src/generated/client/types.ts` from OpenAPI spec
-   
-3. **Validate generated files are up to date** (optional, CI will check):
+
+**For Local Service endpoints:**
+1. **Update Go handlers** with swag annotations in `local-service/handlers.go` or `local-service/main.go`
+2. **Regenerate all API code:**
    ```bash
-   nix develop -c pnpm validate:api
+   nix develop -c pnpm generate:api
    ```
-4. **Commit all changes:**
-   - Go code changes (`local-service/*.go`)
-   - Generated OpenAPI spec (`local-service/generated/openapi.json`)
-   - Generated TypeScript types (`frontend/src/generated/client/types.ts`)
 
-**Note:** CI will automatically validate that both the OpenAPI spec and frontend types match the code. If you forget to regenerate after modifying the API, the CI build will fail with a helpful diff showing exactly what's out of sync.
+### Single Command for All
 
-### When Using Generated Client
+The `pnpm generate:api` command handles everything:
+- Generates `local-service/generated/openapi.json` from Go code (swag)
+- Generates `frontend/src/generated/client/` from local-service spec (@hey-api/openapi-ts)
+- Fetches `backend/generated/openapi.json` from running backend (curl)
+- Generates `local-service/generated/backend_client/` from backend spec (oapi-codegen)
 
-**Frontend (TypeScript with SDK):**
+**Important:** Backend must be running for backend code generation to work.
+
+### Commit All Generated Files
+
+Always commit:
+- Backend OpenAPI spec (`backend/generated/openapi.json`)
+- Backend Go client (`local-service/generated/backend_client/client.go`)
+- Local service OpenAPI spec (`local-service/generated/openapi.json`)
+- Frontend TypeScript client (`frontend/src/generated/client/`)
+
+**Note:** CI validation will be added in the future to ensure generated files are up to date.
+
+### When Using Generated Clients
+
+**Local Service calling Backend (Go):**
+```go
+import "meeting-plunger/local-service/generated/backendclient"
+
+// Create client once (typically in main or handler initialization)
+client, err := backendclient.NewClient(backendURL)
+if err != nil {
+    log.Fatal(err)
+}
+
+// Type-safe API call
+resp, err := client.PostTranscribe(ctx, backendclient.PostTranscribeJSONRequestBody{
+    File: file,
+})
+if err != nil {
+    log.Printf("Backend error: %v", err)
+    return
+}
+// resp is already typed!
+log.Printf("Transcript: %s", resp.Transcript)
+```
+
+**Frontend calling Local Service (TypeScript with SDK):**
 ```typescript
 import { TranscriptionService, OpenAPI, ApiError } from '../generated/client';
 import type { main_TranscriptResponse } from '../generated/client';
@@ -198,20 +285,28 @@ type HealthResponse struct {
 
 ## Benefits
 
-1. **Type Safety:** Catch API contract violations at compile time in both Go and TypeScript
-2. **Single Source of Truth:** Go local-service code is the authoritative API definition
-3. **CI Validation:** Automatically validates both OpenAPI spec and TypeScript types are in sync
-4. **Documentation:** OpenAPI spec serves as API documentation
-5. **Developer Experience:** IntelliSense and autocomplete for all API calls
-6. **Refactoring Safety:** Rename or change an API, and TypeScript compiler catches all usage sites
+1. **Type Safety:** Catch API contract violations at compile time in Python, Go, and TypeScript
+2. **Single Source of Truth:** Each service is authoritative for its own API
+3. **Bidirectional Generation:** Backend ↔ Local Service ↔ Frontend all use generated code
+4. **Documentation:** OpenAPI specs serve as API documentation
+5. **Developer Experience:** IntelliSense and autocomplete for all API calls across all languages
+6. **Refactoring Safety:** Rename or change an API, and compilers catch all usage sites
+7. **No Manual HTTP Code:** No manual JSON marshaling, URL construction, or error handling
 
 ## File Locations
 
 | File/Directory | Description | Committed? |
 |----------------|-------------|------------|
+| **Backend** | | |
+| `backend/main.py` | Python FastAPI with type hints | ✅ Yes |
+| `backend/generated/openapi.json` | Fetched from FastAPI /openapi.json | ✅ Yes |
+| **Local Service** | | |
 | `local-service/handlers.go` | Go handlers with swag annotations | ✅ Yes |
 | `local-service/main.go` | Main API metadata annotations | ✅ Yes |
-| `local-service/generated/openapi.json` | Generated OpenAPI spec (Swagger 2.0) | ✅ Yes |
+| `local-service/generated/openapi.json` | Generated from Go code (Swagger 2.0) | ✅ Yes |
+| `local-service/generated/backend_client/` | Generated Go client for backend | ✅ Yes |
+| `└── client.go` | Type-safe backend client | ✅ Yes |
+| **Frontend** | | |
 | `frontend/src/generated/client/` | Generated TypeScript client | ✅ Yes |
 | `├── index.ts` | Main export file | ✅ Yes |
 | `├── types.gen.ts` | Type definitions | ✅ Yes |
@@ -228,7 +323,26 @@ type HealthResponse struct {
 
 ## Toolchain
 
-The API type sharing uses a two-stage pipeline:
+The API type sharing uses multiple code generators:
+
+### Backend → Local Service
+
+1. **[FastAPI](https://fastapi.tiangolo.com/)** - Auto-generates OpenAPI 3.0 from Python type hints
+   - Input: Python code with type hints
+   - Output: OpenAPI 3.0 spec at `/openapi.json` endpoint
+
+2. **[oapi-codegen](https://github.com/deepmap/oapi-codegen)** - Generates Go client from OpenAPI 3.0
+   - Input: `backend/generated/openapi.json` (OpenAPI 3.0)
+   - Output: `local-service/generated/backend_client/client.go`
+   - Features: Type-safe client, models, error handling
+
+**Why oapi-codegen?**
+- Most popular Go OpenAPI code generator (7.5k+ stars)
+- Native OpenAPI 3.0 support
+- Generates clean, idiomatic Go code
+- Uses standard `net/http`, no external dependencies
+
+### Local Service → Frontend
 
 1. **[swaggo/swag](https://github.com/swaggo/swag)** - Generates Swagger 2.0 from Go annotations
    - Input: Go code with swag annotations
@@ -250,6 +364,8 @@ The API type sharing uses a two-stage pipeline:
 
 ## References
 
+- [FastAPI](https://fastapi.tiangolo.com/) - Python web framework with automatic OpenAPI generation
+- [oapi-codegen](https://github.com/deepmap/oapi-codegen) - OpenAPI code generator for Go
 - [swaggo/swag](https://github.com/swaggo/swag) - Swagger generator for Go
 - [@hey-api/openapi-ts](https://github.com/hey-api/openapi-ts) - Generate TypeScript client and SDK from OpenAPI
 - [OpenAPI Specification](https://swagger.io/specification/) - API standard

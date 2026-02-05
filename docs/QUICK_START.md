@@ -22,6 +22,24 @@ nix develop -c pnpm e2e
 
 See [`.cursor/rules/general.mdc`](.cursor/rules/general.mdc) for all commands.
 
+### API Code Generation
+
+When you modify API endpoints:
+
+```bash
+# Start backend first
+nix develop -c pnpm sut:backend
+
+# Generate all API clients (in another terminal)
+nix develop -c pnpm generate:api
+```
+
+This generates type-safe clients for:
+- Go client for local-service → backend
+- TypeScript client for frontend → local-service
+
+See [API_SHARING.md](API_SHARING.md) for details.
+
 ## Services
 
 - **Backend:** http://localhost:8000 (FastAPI, auto-reloads on changes)

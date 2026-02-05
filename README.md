@@ -99,6 +99,7 @@ See [docs/QUICK_START.md](docs/QUICK_START.md) for more details.
 - **Backend**: Python 3.11, FastAPI with auto-reload (uvicorn)
 - **Frontend**: Vue.js 3, TypeScript, Vite with auto-reload
 - **Local Service**: Golang, HTTP server with auto-reload (air)
+- **API Code Generation**: Bidirectional type-safe client generation (FastAPI → oapi-codegen → Go, swag → @hey-api/openapi-ts → TypeScript)
 - **E2E Testing**: Playwright + Cucumber (Gherkin), managed with pnpm
 - **Infrastructure**: Kubernetes (k8s)
 - **AI Integration**: OpenAI API
@@ -115,6 +116,23 @@ nix develop -c pnpm e2e:headed  # With browser
 ```
 
 Full details: [e2e/README.md](e2e/README.md)
+
+## API Code Generation
+
+All inter-service communication uses type-safe generated clients. Single command to generate all:
+
+```bash
+# Requires backend running (nix develop -c pnpm sut:backend)
+nix develop -c pnpm generate:api
+```
+
+This generates:
+- **Go client** for local-service to call backend (oapi-codegen)
+- **TypeScript client** for frontend to call local-service (@hey-api/openapi-ts)
+
+Benefits: Type safety, no manual HTTP code, IntelliSense across all services.
+
+Full details: [docs/API_SHARING.md](docs/API_SHARING.md) | [docs/BIDIRECTIONAL_API_GENERATION.md](docs/BIDIRECTIONAL_API_GENERATION.md)
 
 ## Code Quality
 
@@ -139,10 +157,14 @@ Full details: [docs/LINTING_AND_FORMATTING.md](docs/LINTING_AND_FORMATTING.md)
 
 - [`.cursor/rules/general.mdc`](.cursor/rules/general.mdc) - **Essential commands & workflow**
 - [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) - System architecture and request flow
+- [docs/API_SHARING.md](docs/API_SHARING.md) - API type sharing and code generation
+- [docs/BIDIRECTIONAL_API_GENERATION.md](docs/BIDIRECTIONAL_API_GENERATION.md) - Bidirectional code generation guide
 - [docs/nix.md](docs/nix.md) - Nix environment setup (manual installation)
 - [docs/WSL2_SETUP.md](docs/WSL2_SETUP.md) - WSL2 setup for Windows users ([中文版](docs/WSL2_SETUP.zh-CN.md))
 - [docs/QUICK_START.md](docs/QUICK_START.md) - Quick start guide
 - [docs/VSCODE_SETUP.md](docs/VSCODE_SETUP.md) - VSCode + Cucumber setup
 - [docs/VERIFICATION.md](docs/VERIFICATION.md) - Setup verification
+- [docs/LINTING_AND_FORMATTING.md](docs/LINTING_AND_FORMATTING.md) - Code quality tools
+- [docs/UNIT_TESTING.md](docs/UNIT_TESTING.md) - Unit testing guide
 - [e2e/README.md](e2e/README.md) - E2E testing guide
 
