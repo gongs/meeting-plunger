@@ -18,10 +18,10 @@ nix develop -c pnpm lint
 
 ## Tools Used
 
-### Client (Go)
+### Local Service (Go)
 - **Formatter**: `gofmt` + `goimports` - Standard Go formatting tools
 - **Linter**: `golangci-lint` - Comprehensive Go linter with multiple checks
-- **Config**: `client/.golangci.yml`
+- **Config**: `local-service/.golangci.yml`
 
 ### Backend (Python)
 - **Formatter**: `ruff format` - Fast Python formatter (Black-compatible)
@@ -35,9 +35,9 @@ nix develop -c pnpm lint
 
 ## Per-Project Commands
 
-### Client (Go)
+### Local Service (Go)
 ```bash
-cd client
+cd local-service
 nix develop -c make lint      # Run linter
 nix develop -c make format    # Format code
 ```
@@ -65,7 +65,7 @@ From the project root, you can run linting/formatting for all subprojects:
 nix develop -c pnpm lint
 
 # Or individually
-nix develop -c pnpm lint:client
+nix develop -c pnpm lint:local-service
 nix develop -c pnpm lint:backend
 nix develop -c pnpm lint:e2e
 
@@ -73,7 +73,7 @@ nix develop -c pnpm lint:e2e
 nix develop -c pnpm format
 
 # Or individually
-nix develop -c pnpm format:client
+nix develop -c pnpm format:local-service
 nix develop -c pnpm format:backend
 nix develop -c pnpm format:e2e
 ```

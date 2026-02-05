@@ -1,28 +1,28 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Script to generate OpenAPI spec from Go client using swaggo/swag
-# The generated openapi.json will be placed in client/generated/
+# Script to generate OpenAPI spec from Go local-service using swaggo/swag
+# The generated openapi.json will be placed in local-service/generated/
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
-CLIENT_DIR="$PROJECT_ROOT/client"
-GENERATED_DIR="$CLIENT_DIR/generated"
+LOCAL_SERVICE_DIR="$PROJECT_ROOT/local-service"
+GENERATED_DIR="$LOCAL_SERVICE_DIR/generated"
 
-echo "🔄 Generating OpenAPI spec for Go client..."
-echo "   Client dir: $CLIENT_DIR"
+echo "🔄 Generating OpenAPI spec for Go local-service..."
+echo "   Local service dir: $LOCAL_SERVICE_DIR"
 echo "   Output dir: $GENERATED_DIR"
 echo ""
 
 # Ensure generated directory exists
 mkdir -p "$GENERATED_DIR"
 
-# Run swag init from the client directory
+# Run swag init from the local-service directory
 # --parseDependency: parse Go files in dependencies
 # --parseInternal: parse Go files in internal packages
 # --parseDepth: dependency parse depth (default is 100)
 # --output: output directory for docs (we'll move the file afterwards)
-cd "$CLIENT_DIR"
+cd "$LOCAL_SERVICE_DIR"
 
 echo "Running swag init..."
 
@@ -63,7 +63,7 @@ rm -f "$GENERATED_DIR/swagger.yaml"
 
 echo ""
 echo "✅ OpenAPI generation complete!"
-echo "   File: client/generated/openapi.json"
+echo "   File: local-service/generated/openapi.json"
 echo ""
 echo "To view the spec:"
-echo "  cat client/generated/openapi.json | jq"
+echo "  cat local-service/generated/openapi.json | jq"

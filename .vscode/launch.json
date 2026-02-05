@@ -22,13 +22,13 @@
       "justMyCode": true
     },
     {
-      "name": "Go: Client",
+      "name": "Go: Local Service",
       "type": "go",
       "request": "launch",
       "mode": "auto",
-      "program": "${workspaceFolder}/client",
+      "program": "${workspaceFolder}/local-service",
       "args": ["serve"],
-      "cwd": "${workspaceFolder}/client"
+      "cwd": "${workspaceFolder}/local-service"
     },
     {
       "name": "E2E: Debug Tests",
@@ -52,7 +52,7 @@
   "compounds": [
     {
       "name": "Full Stack",
-      "configurations": ["Python: FastAPI", "Go: Client"],
+      "configurations": ["Python: FastAPI", "Go: Local Service"],
       "presentation": {
         "order": 1
       }

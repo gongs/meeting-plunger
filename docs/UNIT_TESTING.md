@@ -2,7 +2,7 @@
 
 ## Overview
 
-This document describes the unit testing setup for Meeting Plunger's client and backend.
+This document describes the unit testing setup for Meeting Plunger's local-service and backend.
 
 ## Running Tests
 
@@ -17,14 +17,14 @@ cd backend
 nix develop -c pnpm test
 ```
 
-### Client Tests (Go)
+### Local Service Tests (Go)
 
 ```bash
 # Run from project root
-nix develop -c pnpm test:client
+nix develop -c pnpm test:local-service
 
-# Run directly from client directory
-cd client
+# Run directly from local-service directory
+cd local-service
 nix develop -c make test
 ```
 
@@ -40,7 +40,7 @@ Tests the FastAPI endpoints using FastAPI's TestClient:
 
 **Note**: Python tests follow the convention of being in a separate `tests/` directory.
 
-### Client: `client/handlers_test.go`
+### Local Service: `local-service/handlers_test.go`
 
 Tests the Go HTTP handlers using httptest:
 
@@ -58,7 +58,7 @@ Tests the Go HTTP handlers using httptest:
 - **Dependencies**: Already in `requirements.txt`
 - **Async Support**: pytest-asyncio available for async tests
 
-### Client (Go testing)
+### Local Service (Go testing)
 
 - **Framework**: Standard Go testing package
 - **Test Discovery**: Files matching `*_test.go`
@@ -88,7 +88,7 @@ def test_my_endpoint():
     assert response.status_code == 200
 ```
 
-### Client (Go)
+### Local Service (Go)
 
 1. Create test files in the same directory as the code with suffix `*_test.go`
 2. Test functions must match `func TestXxx(t *testing.T)`
@@ -132,7 +132,7 @@ The unit test commands can be integrated into CI/CD pipelines:
 
 ```bash
 # Run all unit tests
-nix develop -c pnpm test:backend && nix develop -c pnpm test:client
+nix develop -c pnpm test:backend && nix develop -c pnpm test:local-service
 ```
 
 ## See Also

@@ -31,7 +31,7 @@ jobs:
         with:
           python-version: '3.11'
 
-      # Setup Go for client
+      # Setup Go for local-service
       - name: Setup Go
         uses: actions/setup-go@v5
         with:
@@ -46,7 +46,7 @@ jobs:
         run: pip install -r requirements.txt
 
       - name: Install Go dependencies
-        working-directory: client
+        working-directory: local-service
         run: go mod download
 
       - name: Install golangci-lint
@@ -82,8 +82,8 @@ jobs:
         working-directory: backend
         run: pnpm test
 
-      - name: Run client unit tests
-        working-directory: client
+      - name: Run local-service unit tests
+        working-directory: local-service
         run: make test
 
       - name: Run frontend unit tests
@@ -99,12 +99,12 @@ jobs:
         env:
           PYTHONUNBUFFERED: '1'
 
-      - name: Start client service
-        working-directory: client
+      - name: Start local-service
+        working-directory: local-service
         run: |
           go build -o meeting-plunger .
           ./meeting-plunger serve &
-          echo $! > client.pid
+          echo $! > local-service.pid
 
       - name: Wait for services to be ready
         run: |
@@ -118,13 +118,13 @@ jobs:
             sleep 1
           done
           
-          echo "Waiting for client service..."
+          echo "Waiting for local-service..."
           for i in {1..30}; do
             if curl -f http://localhost:3001/health > /dev/null 2>&1; then
-              echo "Client is ready!"
+              echo "Local service is ready!"
               break
             fi
-            echo "Attempt $i/30: Client not ready yet..."
+            echo "Attempt $i/30: Local service not ready yet..."
             sleep 1
           done
           
@@ -144,8 +144,8 @@ jobs:
           if [ -f backend/backend.pid ]; then
             kill $(cat backend/backend.pid) || true
           fi
-          if [ -f client/client.pid ]; then
-            kill $(cat client/client.pid) || true
+          if [ -f local-service/local-service.pid ]; then
+            kill $(cat local-service/local-service.pid) || true
           fi
 
       # Upload artifacts on failure

@@ -17,10 +17,9 @@ User's Computer                                Server
 │              │               │               └──────▲───────┘
 │              ▼               │                      │
 │   ┌─────────────────────┐   │                      │
-│   │ Client (Golang)     │   │                      │
+│   │ Local Service (Go)  │   │                      │
 │   │ API Server :3001    │───┼──── HTTPS ───────────┘
-│   │ CLI                 │   │    auth token
-│   └─────────────────────┘   │
+│   └─────────────────────┘   │    auth token
 └─────────────────────────────┘
 ```
 
@@ -31,15 +30,15 @@ User's Computer                                Server
 - **Port**: 3000
 - **Technology**: Vue.js 3, TypeScript, Vite
 - **Purpose**: Browser-based user interface
-- **Communication**: Proxies API calls to client on port 3001
+- **Communication**: Proxies API calls to local-service on port 3001
 
-### Client (Golang)
-- **Location**: `client/`
+### Local Service (Golang)
+- **Location**: `local-service/`
 - **Port**: 3001
 - **Technology**: Go 1.25+
 - **Purpose**: 
   - API server bridging frontend and backend
-  - CLI for command-line operations
+  - Processes audio files locally using user's machine resources
 - **Endpoints**:
   - `GET /health` - Health check
   - `POST /upload` - Upload audio file (currently returns hardcoded response)
@@ -64,17 +63,17 @@ User's Computer                                Server
    - Captures file from upload form
    - Sends POST /upload request
    ↓
-3. Client (Go :3001)
+3. Local Service (Go :3001)
    - Receives upload request
-   - Processes file
+   - Processes file locally
    - Calls backend API
    ↓
 4. Backend (Python :8000)
-   - Receives request from client
+   - Receives request from local-service
    - Calls OpenAI transcription API
    - Returns transcript
    ↓
-5. Response flows back: Backend → Client → Frontend → User
+5. Response flows back: Backend → Local Service → Frontend → User
 ```
 
 ## Development Setup
@@ -87,7 +86,7 @@ nix develop -c pnpm sut
 
 This starts:
 - Backend on http://localhost:8000
-- Client on http://localhost:3001  
+- Local Service on http://localhost:3001  
 - Frontend on http://localhost:3000
 
 All services support auto-reload on code changes.
@@ -96,7 +95,7 @@ All services support auto-reload on code changes.
 
 ### Unit Tests
 - **Frontend**: Vitest (`pnpm test:frontend`)
-- **Client**: Go test (`pnpm test:client`)
+- **Local Service**: Go test (`pnpm test:local-service`)
 - **Backend**: Pytest (`pnpm test:backend`)
 
 ### E2E Tests
@@ -109,7 +108,7 @@ All services support auto-reload on code changes.
 | Component | Technology | Auto-Reload |
 |-----------|------------|-------------|
 | Frontend  | Vue.js 3, TypeScript, Vite | ✅ Vite HMR |
-| Client    | Golang, net/http | ✅ Air |
+| Local Service | Golang, net/http | ✅ Air |
 | Backend   | Python, FastAPI | ✅ Uvicorn |
 | E2E Tests | Playwright, Cucumber | N/A |
 

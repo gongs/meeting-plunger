@@ -1,5 +1,5 @@
 {
-  description = "Meeting Plunger - A monorepo with Python FastAPI backend and Golang CLI";
+  description = "Meeting Plunger - A monorepo with Python FastAPI backend and Golang local-service";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
@@ -66,7 +66,7 @@
             echo "  pnpm:     $(pnpm --version)"
             echo ""
             echo "Quick start:"
-            echo "  pnpm sut      # Start backend + client (both auto-reload)"
+            echo "  pnpm sut      # Start backend + local-service (both auto-reload)"
             echo "  pnpm e2e      # Run e2e tests"
             echo "  pnpm lint     # Lint all code"
             echo "  pnpm format   # Format all code"

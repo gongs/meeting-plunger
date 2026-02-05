@@ -1,29 +1,29 @@
 # API Type Sharing
 
-This document describes how API definitions are shared between the Go client and TypeScript frontend.
+This document describes how API definitions are shared between the Go local-service and TypeScript frontend.
 
 ## Overview
 
-The Meeting Plunger project uses OpenAPI/Swagger to maintain a single source of truth for API types. The Go client generates an OpenAPI specification from code annotations, which can then be used to generate TypeScript types for the frontend.
+The Meeting Plunger project uses OpenAPI/Swagger to maintain a single source of truth for API types. The Go local-service generates an OpenAPI specification from code annotations, which can then be used to generate TypeScript types for the frontend.
 
 ## Architecture
 
 ```
-Go Client (handlers.go)
+Go Local Service (handlers.go)
   ↓ swag annotations
   ↓ swag init
-OpenAPI Spec (client/generated/openapi.json)
-  ↓ openapi-typescript (future)
-TypeScript Types (frontend/src/types/api.ts)
+OpenAPI Spec (local-service/generated/openapi.json)
+  ↓ openapi-typescript
+TypeScript Client (frontend/src/generated/client/)
 ```
 
 ## Current Setup
 
-### Go Client → OpenAPI
+### Go Local Service → OpenAPI
 
-The Go client uses [swaggo/swag](https://github.com/swaggo/swag) to generate OpenAPI specs from code annotations.
+The Go local-service uses [swaggo/swag](https://github.com/swaggo/swag) to generate OpenAPI specs from code annotations.
 
-**Location:** `client/generated/openapi.json`
+**Location:** `local-service/generated/openapi.json`
 
 **Generate:**
 ```bash
@@ -35,7 +35,7 @@ nix develop -c pnpm generate:openapi
 nix develop -c pnpm validate:api
 ```
 
-**Example annotations in `client/handlers.go`:**
+**Example annotations in `local-service/handlers.go`:**
 ```go
 // HealthResponse represents the health check response
 type HealthResponse struct {
@@ -44,7 +44,7 @@ type HealthResponse struct {
 
 // HandleHealth serves the health check endpoint
 // @Summary Health check
-// @Description Returns the health status of the client service
+// @Description Returns the health status of the local service
 // @Tags health
 // @Produce json
 // @Success 200 {object} HealthResponse
@@ -78,7 +78,7 @@ cd frontend && nix develop -c pnpm generate:client
 **Configuration:** `frontend/openapi-ts.config.ts`
 ```typescript
 export default defineConfig({
-  input: '../client/generated/openapi.json',
+  input: '../local-service/generated/openapi.json',
   output: 'src/generated/client',
   client: 'fetch',
   services: {
@@ -123,13 +123,13 @@ export class TranscriptionService {
 
 ### When Adding/Modifying API Endpoints
 
-1. **Update Go handlers** with swag annotations in `client/handlers.go` or `client/main.go`
+1. **Update Go handlers** with swag annotations in `local-service/handlers.go` or `local-service/main.go`
 2. **Regenerate both OpenAPI spec and TypeScript types:**
    ```bash
    nix develop -c pnpm generate:api
    ```
    This single command:
-   - Generates `client/generated/openapi.json` from Go code
+   - Generates `local-service/generated/openapi.json` from Go code
    - Converts Swagger 2.0 to OpenAPI 3.0
    - Generates `frontend/src/generated/client/types.ts` from OpenAPI spec
    
@@ -138,8 +138,8 @@ export class TranscriptionService {
    nix develop -c pnpm validate:api
    ```
 4. **Commit all changes:**
-   - Go code changes (`client/*.go`)
-   - Generated OpenAPI spec (`client/generated/openapi.json`)
+   - Go code changes (`local-service/*.go`)
+   - Generated OpenAPI spec (`local-service/generated/openapi.json`)
    - Generated TypeScript types (`frontend/src/generated/client/types.ts`)
 
 **Note:** CI will automatically validate that both the OpenAPI spec and frontend types match the code. If you forget to regenerate after modifying the API, the CI build will fail with a helpful diff showing exactly what's out of sync.
@@ -183,7 +183,7 @@ const handleSubmit = async () => {
 };
 ```
 
-**Client (Go):**
+**Local Service (Go):**
 ```go
 type TranscriptResponse struct {
     Transcript string `json:"transcript" example:"Hello, how are you?"`
@@ -199,7 +199,7 @@ type HealthResponse struct {
 ## Benefits
 
 1. **Type Safety:** Catch API contract violations at compile time in both Go and TypeScript
-2. **Single Source of Truth:** Go code is the authoritative API definition
+2. **Single Source of Truth:** Go local-service code is the authoritative API definition
 3. **CI Validation:** Automatically validates both OpenAPI spec and TypeScript types are in sync
 4. **Documentation:** OpenAPI spec serves as API documentation
 5. **Developer Experience:** IntelliSense and autocomplete for all API calls
@@ -209,9 +209,9 @@ type HealthResponse struct {
 
 | File/Directory | Description | Committed? |
 |----------------|-------------|------------|
-| `client/handlers.go` | Go handlers with swag annotations | ✅ Yes |
-| `client/main.go` | Main API metadata annotations | ✅ Yes |
-| `client/generated/openapi.json` | Generated OpenAPI spec (Swagger 2.0) | ✅ Yes |
+| `local-service/handlers.go` | Go handlers with swag annotations | ✅ Yes |
+| `local-service/main.go` | Main API metadata annotations | ✅ Yes |
+| `local-service/generated/openapi.json` | Generated OpenAPI spec (Swagger 2.0) | ✅ Yes |
 | `frontend/src/generated/client/` | Generated TypeScript client | ✅ Yes |
 | `├── index.ts` | Main export file | ✅ Yes |
 | `├── types.gen.ts` | Type definitions | ✅ Yes |
@@ -232,7 +232,7 @@ The API type sharing uses a two-stage pipeline:
 
 1. **[swaggo/swag](https://github.com/swaggo/swag)** - Generates Swagger 2.0 from Go annotations
    - Input: Go code with swag annotations
-   - Output: `client/generated/openapi.json` (Swagger 2.0)
+   - Output: `local-service/generated/openapi.json` (Swagger 2.0)
 
 2. **[@hey-api/openapi-ts](https://github.com/hey-api/openapi-ts)** - Generates TypeScript client, SDK, and types
    - Input: Swagger 2.0/OpenAPI 3.0 JSON

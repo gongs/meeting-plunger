@@ -5,7 +5,7 @@ Meeting Plunger exists to turn messy meeting audio into usable, trustworthy meet
 A monorepo project with:
 - **Backend**: Python FastAPI server (deployed on k8s) - handles AI transcription
 - **Frontend**: Vue.js 3 web interface (localhost:3000) - browser UI
-- **Client**: Golang API server (localhost:3001) + CLI - bridges frontend and backend
+- **Local Service**: Golang API server (localhost:3001) - bridges frontend and backend, processes audio locally
 
 ## Architecture
 
@@ -20,10 +20,9 @@ User's Computer                                Server
 │              │               │               └──────▲───────┘
 │              ▼               │                      │
 │   ┌─────────────────────┐   │                      │
-│   │ Client (Golang)     │   │                      │
+│   │ Local Service (Go)  │   │                      │
 │   │ API Server :3001    │───┼──── HTTPS ───────────┘
-│   │ CLI                 │   │    auth token
-│   └─────────────────────┘   │
+│   └─────────────────────┘   │    auth token
 └─────────────────────────────┘
 ```
 
@@ -79,7 +78,7 @@ See [docs/QUICK_START.md](docs/QUICK_START.md) for more details.
 .
 ├── backend/          # Python FastAPI backend
 ├── frontend/         # Vue.js 3 web interface
-├── client/           # Golang CLI and local HTTP service
+├── local-service/    # Golang local HTTP service
 ├── e2e/              # Playwright + Gherkin e2e tests
 ├── docs/             # Documentation
 ├── .cursor/          # Cursor AI rules
@@ -99,7 +98,7 @@ See [docs/QUICK_START.md](docs/QUICK_START.md) for more details.
 
 - **Backend**: Python 3.11, FastAPI with auto-reload (uvicorn)
 - **Frontend**: Vue.js 3, TypeScript, Vite with auto-reload
-- **Client**: Golang, CLI + HTTP server with auto-reload (air)
+- **Local Service**: Golang, HTTP server with auto-reload (air)
 - **E2E Testing**: Playwright + Cucumber (Gherkin), managed with pnpm
 - **Infrastructure**: Kubernetes (k8s)
 - **AI Integration**: OpenAI API
@@ -128,10 +127,10 @@ nix develop -c pnpm format  # Format all code
 
 Individual projects:
 ```bash
-nix develop -c pnpm lint:client    # Go (golangci-lint)
-nix develop -c pnpm lint:backend   # Python (ruff)
-nix develop -c pnpm lint:frontend  # TypeScript/Vue (eslint)
-nix develop -c pnpm lint:e2e       # JavaScript (eslint)
+nix develop -c pnpm lint:local-service  # Go (golangci-lint)
+nix develop -c pnpm lint:backend        # Python (ruff)
+nix develop -c pnpm lint:frontend       # TypeScript/Vue (eslint)
+nix develop -c pnpm lint:e2e            # JavaScript (eslint)
 ```
 
 Full details: [docs/LINTING_AND_FORMATTING.md](docs/LINTING_AND_FORMATTING.md)

@@ -6,9 +6,9 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
-CLIENT_DIR="$PROJECT_ROOT/client"
+LOCAL_SERVICE_DIR="$PROJECT_ROOT/local-service"
 FRONTEND_DIR="$PROJECT_ROOT/frontend"
-OPENAPI_FILE="$CLIENT_DIR/generated/openapi.json"
+OPENAPI_FILE="$LOCAL_SERVICE_DIR/generated/openapi.json"
 FRONTEND_GENERATED_DIR="$FRONTEND_DIR/src/generated/client"
 
 echo "🔍 Validating generated API files are up to date..."
@@ -22,7 +22,7 @@ trap "rm -rf $TEMP_DIR" EXIT
 # STEP 1: Validate OpenAPI JSON
 # ============================================================================
 
-echo "📄 Checking OpenAPI spec (client/generated/openapi.json)..."
+echo "📄 Checking OpenAPI spec (local-service/generated/openapi.json)..."
 
 # Check if the OpenAPI file exists
 if [ ! -f "$OPENAPI_FILE" ]; then
@@ -36,7 +36,7 @@ fi
 cp "$OPENAPI_FILE" "$TEMP_DIR/openapi.json.old"
 
 # Regenerate OpenAPI spec
-"$SCRIPT_DIR/generate-client-openapi.sh" > /dev/null 2>&1
+"$SCRIPT_DIR/generate-local-service-openapi.sh" > /dev/null 2>&1
 
 # Compare OpenAPI files
 if ! diff -q "$TEMP_DIR/openapi.json.old" "$OPENAPI_FILE" > /dev/null 2>&1; then
@@ -46,7 +46,7 @@ if ! diff -q "$TEMP_DIR/openapi.json.old" "$OPENAPI_FILE" > /dev/null 2>&1; then
   echo "The committed openapi.json differs from the generated version."
   echo "This usually means the Go API code was modified but the spec wasn't regenerated."
   echo ""
-  echo "📋 Differences in client/generated/openapi.json:"
+  echo "📋 Differences in local-service/generated/openapi.json:"
   echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
   
   # Show colorful diff if available, otherwise plain diff
@@ -61,7 +61,7 @@ if ! diff -q "$TEMP_DIR/openapi.json.old" "$OPENAPI_FILE" > /dev/null 2>&1; then
   echo "🔧 To fix this:"
   echo "   1. Run: nix develop -c pnpm generate:api"
   echo "   2. Commit the updated files:"
-  echo "      - client/generated/openapi.json"
+  echo "      - local-service/generated/openapi.json"
   echo "      - frontend/src/generated/client/**"
   echo ""
   
@@ -115,7 +115,7 @@ if [ -n "$DIFF_OUTPUT" ]; then
   echo "🔧 To fix this:"
   echo "   1. Run: nix develop -c pnpm generate:api"
   echo "   2. Commit the updated files:"
-  echo "      - client/generated/openapi.json"
+  echo "      - local-service/generated/openapi.json"
   echo "      - frontend/src/generated/client/**"
   echo ""
   

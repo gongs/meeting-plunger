@@ -1,10 +1,10 @@
-# Client (Golang)
+# Local Service (Golang)
 
-Golang CLI and API server for Meeting Plunger. The client bridges communication between the frontend (Vue.js) and backend (Python).
+Golang local HTTP service for Meeting Plunger. The local-service bridges communication between the frontend (Vue.js) and backend (Python), processing audio files locally using the user's machine resources.
 
 ## Development
 
-The client uses `air` for live reload during development. Changes to `.go` files automatically trigger a rebuild.
+The local-service uses `air` for live reload during development. Changes to `.go` files automatically trigger a rebuild.
 
 ### Start with Auto-Reload
 
@@ -13,23 +13,23 @@ From the project root:
 nix develop -c pnpm sut
 ```
 
-Or run the client alone:
+Or run the local-service alone:
 ```bash
-nix develop -c pnpm sut:client
+nix develop -c pnpm sut:local-service
 ```
 
 Or directly:
 ```bash
-cd client
+cd local-service
 nix develop -c air
 ```
 
 ### Build Binary
 
 ```bash
-cd client
-nix develop -c go build -o client .
-./client serve
+cd local-service
+nix develop -c go build -o local-service .
+./local-service serve
 ```
 
 ## Configuration
@@ -53,22 +53,22 @@ When you change a `.go` file:
 
 **Request Flow:**
 ```
-Frontend (Vue :3000) → Client (Go :3001) → Backend (Python :8000) → OpenAI API
+Frontend (Vue :3000) → Local Service (Go :3001) → Backend (Python :8000) → OpenAI API
 ```
 
-The client API server runs on port 3001 and:
+The local-service runs on port 3001 and:
 - Receives requests from the frontend
-- Handles file uploads
-- Communicates with the backend API
+- Handles file uploads and processes audio locally
+- Communicates with the backend API for AI services
 - Returns transcription results
 
 ## API Documentation
 
 ### OpenAPI Specification
 
-The client API is documented using OpenAPI/Swagger. The specification is automatically generated from code annotations using [swaggo/swag](https://github.com/swaggo/swag).
+The local-service API is documented using OpenAPI/Swagger. The specification is automatically generated from code annotations using [swaggo/swag](https://github.com/swaggo/swag).
 
-**Generated spec:** `client/generated/openapi.json`
+**Generated spec:** `local-service/generated/openapi.json`
 
 #### Regenerate OpenAPI Spec
 
@@ -79,7 +79,7 @@ After modifying API endpoints or their annotations:
 nix develop -c pnpm generate:openapi
 
 # Or run the script directly
-./scripts/generate-client-openapi.sh
+./scripts/generate-local-service-openapi.sh
 ```
 
 #### Validate OpenAPI Spec
@@ -123,10 +123,10 @@ air
 go run . serve
 
 # Build binary
-go build -o client .
+go build -o local-service .
 
 # Run binary
-./client serve
+./local-service serve
 ```
 
 ## CLI Usage

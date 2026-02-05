@@ -25,7 +25,8 @@ See [`.cursor/rules/general.mdc`](.cursor/rules/general.mdc) for all commands.
 ## Services
 
 - **Backend:** http://localhost:8000 (FastAPI, auto-reloads on changes)
-- **Client:** http://localhost:3000 (Go, auto-reloads on changes)
+- **Local Service:** http://localhost:3001 (Go, auto-reloads on changes)
+- **Frontend:** http://localhost:3000 (Vue.js, auto-reloads on changes)
 
 ## More Information
 

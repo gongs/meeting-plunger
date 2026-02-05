@@ -78,15 +78,15 @@ Debug the backend FastAPI application.
 3. Press F5 or use "Python: FastAPI" configuration
 4. Backend starts on http://localhost:8000
 
-### 2. Go: Client
+### 2. Go: Local Service
 
-Debug the Go client application.
+Debug the Go local-service application.
 
 **Usage:**
-1. Open `client/main.go`
+1. Open `local-service/main.go`
 2. Set breakpoints
-3. Press F5 or use "Go: Client" configuration
-4. Client starts on http://localhost:3000
+3. Press F5 or use "Go: Local Service" configuration
+4. Local service starts on http://localhost:3001
 
 ### 3. E2E: Debug Tests
 
@@ -100,7 +100,7 @@ Debug E2E tests with Playwright.
 
 ### 4. Full Stack (Compound)
 
-Debug both backend and client simultaneously.
+Debug both backend and local-service simultaneously.
 
 **Usage:**
 1. Select "Full Stack" from debug dropdown
@@ -111,11 +111,11 @@ Debug both backend and client simultaneously.
 
 Available tasks (Ctrl+Shift+P → "Tasks: Run Task"):
 
-- **Start SUT (Backend + Client)** - Run `pnpm sut`
+- **Start SUT (Backend + Local Service)** - Run `pnpm sut`
 - **Run E2E Tests** - Run `pnpm e2e`
 - **Run E2E Tests (Headed)** - Run `pnpm e2e:headed`
 - **Start Backend** - Start backend only
-- **Start Client** - Start client only
+- **Start Local Service** - Start local-service only
 - **Install Dependencies** - Install all dependencies
 
 ### Quick Access
@@ -148,10 +148,9 @@ Available tasks (Ctrl+Shift+P → "Tasks: Run Task"):
 
 When typing in a `.feature` file:
 ```gherkin
-Given I open the client
+Given I open the application
 ```
-VSCode suggests:
-- `Given I open the client application at "http://localhost:3000"`
+VSCode suggests existing steps from your step definitions.
 
 ## Language-Specific Settings
 
