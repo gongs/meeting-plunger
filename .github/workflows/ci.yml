@@ -109,6 +109,12 @@ jobs:
           ./meeting-plunger serve &
           echo $! > local-service.pid
 
+      - name: Start frontend
+        working-directory: frontend
+        run: |
+          pnpm dev &
+          echo $! > frontend.pid
+
       - name: Wait for services to be ready
         run: |
           echo "Waiting for backend service..."
@@ -131,9 +137,20 @@ jobs:
             sleep 1
           done
           
+          echo "Waiting for frontend..."
+          for i in {1..30}; do
+            if curl -f http://localhost:3000 > /dev/null 2>&1; then
+              echo "Frontend is ready!"
+              break
+            fi
+            echo "Attempt $i/30: Frontend not ready yet..."
+            sleep 1
+          done
+          
           echo "Verifying services are responding..."
           curl -f http://localhost:8000/health
           curl -f http://localhost:3001/health
+          curl -f http://localhost:3000 > /dev/null
 
       - name: Run e2e tests
         working-directory: e2e
@@ -149,6 +166,9 @@ jobs:
           fi
           if [ -f local-service/local-service.pid ]; then
             kill $(cat local-service/local-service.pid) || true
+          fi
+          if [ -f frontend/frontend.pid ]; then
+            kill $(cat frontend/frontend.pid) || true
           fi
 
       # Upload artifacts on failure
