@@ -18,7 +18,6 @@
 - ✅ Playwright 1.58.1
 - ✅ Cucumber/Gherkin 11.3.0
 - ✅ pnpm package management
-- ✅ 2 feature files with test scenarios
 - ✅ Step definitions implemented
 - ✅ Custom World with Playwright integration
 
@@ -29,7 +28,6 @@ pnpm test          # Run all tests (headless)
 pnpm test:headed   # Run with visible browser
 pnpm test:debug    # Run in debug mode
 pnpm test:health   # Run health check tests only
-pnpm test:ui       # Run UI tests only
 pnpm dry-run       # Validate test structure
 ```
 
@@ -41,7 +39,7 @@ pnpm dry-run       # Validate test structure
 ✅ Backend dependencies installed
 ✅ Client compiles successfully
 ✅ E2E test dependencies installed (139 packages)
-✅ Test structure validated (3 scenarios, 12 steps)
+✅ Test structure validated (2 scenarios, 8 steps)
 ```
 
 ## Quick Start
@@ -64,10 +62,6 @@ nix develop -c pnpm e2e
 ### Health Check Tests (`features/health-check.feature`)
 - Backend health check
 - Client health check
-
-### Client UI Tests (`features/client-ui.feature`)
-- Access client home page
-- Verify page title and content
 
 ## Next Steps
 

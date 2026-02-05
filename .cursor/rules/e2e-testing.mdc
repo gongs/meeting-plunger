@@ -30,11 +30,9 @@ nix develop -c pnpm e2e:debug
 ```
 e2e/
 ├── features/           # Gherkin feature files
-│   ├── health-check.feature
-│   └── client-ui.feature
+│   └── health-check.feature
 ├── steps/              # Step definitions (TypeScript)
-│   ├── health-check.steps.ts
-│   └── client-ui.steps.ts
+│   └── health-check.steps.ts
 ├── support/            # Support files
 │   └── world.ts       # Custom world with Playwright setup
 ├── tsconfig.json       # TypeScript configuration
