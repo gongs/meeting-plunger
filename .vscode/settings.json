@@ -4,11 +4,11 @@
     "e2e/features/**/*.feature"
   ],
   "cucumber.glue": [
-    "e2e/steps/**/*.js",
-    "e2e/support/**/*.js"
+    "e2e/steps/**/*.ts",
+    "e2e/support/**/*.ts"
   ],
   "cucumberautocomplete.steps": [
-    "e2e/steps/*.js"
+    "e2e/steps/*.ts"
   ],
   "cucumberautocomplete.syncfeatures": "e2e/features/**/*.feature",
   "cucumberautocomplete.strictGherkinCompletion": true,
