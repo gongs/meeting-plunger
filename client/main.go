@@ -23,6 +23,7 @@ func main() {
 func startHTTPServer() {
 	http.HandleFunc("/", HandleRoot)
 	http.HandleFunc("/health", HandleHealth)
+	http.HandleFunc("/upload", HandleUpload)
 
 	port := ":3000"
 	fmt.Printf("Starting local HTTP server on http://localhost%s\n", port)
