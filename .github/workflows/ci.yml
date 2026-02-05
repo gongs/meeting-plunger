@@ -75,6 +75,10 @@ jobs:
         working-directory: client
         run: make test
 
+      - name: Run frontend unit tests
+        working-directory: frontend
+        run: pnpm test
+
       # Start services and run e2e tests
       - name: Start backend service
         working-directory: backend
