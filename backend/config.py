@@ -7,8 +7,5 @@ load_dotenv()
 # OpenAI Configuration
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
-if not OPENAI_API_KEY:
-    raise ValueError(
-        "OPENAI_API_KEY not found in environment variables. "
-        "Please create a .env file in the backend directory with your OpenAI API key."
-    )
+# Note: OPENAI_API_KEY validation is deferred to runtime when actually needed.
+# This allows importing the module (e.g., for OpenAPI schema generation) without requiring the key.

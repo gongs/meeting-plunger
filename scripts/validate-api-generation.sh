@@ -40,7 +40,23 @@ fi
 cp "$BACKEND_OPENAPI_FILE" "$TEMP_DIR/backend-openapi.json.old"
 
 # Regenerate backend OpenAPI spec
-"$SCRIPT_DIR/generate-backend-openapi.sh" > /dev/null 2>&1
+# Capture both stdout and stderr to show errors if generation fails
+if ! GENERATION_OUTPUT=$("$SCRIPT_DIR/generate-backend-openapi.sh" 2>&1); then
+  echo ""
+  echo "❌ ERROR: Failed to regenerate backend OpenAPI spec!"
+  echo ""
+  echo "The OpenAPI generation script failed with the following error:"
+  echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+  echo "$GENERATION_OUTPUT"
+  echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+  echo ""
+  echo "This is usually caused by:"
+  echo "  - Missing environment variables (e.g., OPENAI_API_KEY)"
+  echo "  - Import errors in the FastAPI backend code"
+  echo "  - Python dependency issues"
+  echo ""
+  exit 1
+fi
 
 # Compare backend OpenAPI files
 if ! diff -q "$TEMP_DIR/backend-openapi.json.old" "$BACKEND_OPENAPI_FILE" > /dev/null 2>&1; then
@@ -97,7 +113,18 @@ fi
 cp "$BACKEND_CLIENT_FILE" "$TEMP_DIR/backend-client.go.old"
 
 # Regenerate backend Go client
-"$SCRIPT_DIR/generate-backend-client.sh" > /dev/null 2>&1
+# Capture both stdout and stderr to show errors if generation fails
+if ! GENERATION_OUTPUT=$("$SCRIPT_DIR/generate-backend-client.sh" 2>&1); then
+  echo ""
+  echo "❌ ERROR: Failed to regenerate backend Go client!"
+  echo ""
+  echo "The client generation script failed with the following error:"
+  echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+  echo "$GENERATION_OUTPUT"
+  echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+  echo ""
+  exit 1
+fi
 
 # Compare backend client files
 if ! diff -q "$TEMP_DIR/backend-client.go.old" "$BACKEND_CLIENT_FILE" > /dev/null 2>&1; then
@@ -156,7 +183,18 @@ fi
 cp "$LOCAL_SERVICE_OPENAPI_FILE" "$TEMP_DIR/openapi.json.old"
 
 # Regenerate OpenAPI spec
-"$SCRIPT_DIR/generate-local-service-openapi.sh" > /dev/null 2>&1
+# Capture both stdout and stderr to show errors if generation fails
+if ! GENERATION_OUTPUT=$("$SCRIPT_DIR/generate-local-service-openapi.sh" 2>&1); then
+  echo ""
+  echo "❌ ERROR: Failed to regenerate local-service OpenAPI spec!"
+  echo ""
+  echo "The OpenAPI generation script failed with the following error:"
+  echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+  echo "$GENERATION_OUTPUT"
+  echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+  echo ""
+  exit 1
+fi
 
 # Compare OpenAPI files
 if ! diff -q "$TEMP_DIR/openapi.json.old" "$LOCAL_SERVICE_OPENAPI_FILE" > /dev/null 2>&1; then
@@ -220,7 +258,24 @@ cd "$FRONTEND_DIR"
 # Temporarily move the generated directory and generate fresh
 mv "$FRONTEND_GENERATED_DIR" "$TEMP_DIR/client.backup"
 mkdir -p "$FRONTEND_GENERATED_DIR"
-pnpm generate:client > /dev/null 2>&1
+
+# Generate fresh client with error capture
+if ! GENERATION_OUTPUT=$(pnpm generate:client 2>&1); then
+  # Restore the original committed version on error
+  rm -rf "$FRONTEND_GENERATED_DIR"
+  mv "$TEMP_DIR/client.backup" "$FRONTEND_GENERATED_DIR"
+  
+  echo ""
+  echo "❌ ERROR: Failed to generate frontend client!"
+  echo ""
+  echo "The frontend client generation failed with the following error:"
+  echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+  echo "$GENERATION_OUTPUT"
+  echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+  echo ""
+  exit 1
+fi
+
 cp -r "$FRONTEND_GENERATED_DIR" "$TEMP_DIR/client.fresh"
 
 # Restore the original committed version
