@@ -45,10 +45,20 @@ async def health_check():
 
 @app.post("/transcribe")
 async def transcribe(file: UploadFile = File(...)):  # noqa: B008
-    """Transcribe audio file - currently returns hardcoded response."""
-    # TODO: Implement actual transcription logic
-    # For now, return hardcoded response
-    return {"transcript": "Hello, how are you?"}
+    """Transcribe audio file using OpenAI API."""
+    # Read the uploaded file content
+    audio_content = await file.read()
+    
+    # Create a temporary file-like object for OpenAI API
+    audio_file = (file.filename, audio_content, file.content_type)
+    
+    # Call OpenAI Transcription API
+    transcript = openai_client.audio.transcriptions.create(
+        model="gpt-4o-mini-transcribe",
+        file=audio_file
+    )
+    
+    return {"transcript": transcript.text}
 
 
 if __name__ == "__main__":

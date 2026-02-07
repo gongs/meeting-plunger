@@ -5,8 +5,8 @@ Feature: Single Speaker
     Given OpenAI transcription API replys the following when the model is "gpt-4o-transcribe-diarize":
     """
     {
-      "text": "Hello, how are you?",
+      "text": "Please be very quiet.",
     }
     """
     When I convert the audio file "small-single-speaker.wav" into transcript
-    Then the transcript should be "Hello, how are you?"
+    Then the transcript should be "Please be very quiet."
