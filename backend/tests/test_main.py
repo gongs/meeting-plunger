@@ -46,13 +46,13 @@ def test_transcribe_endpoint():
         json={"enabled": True, "transcript": "Hello, how are you?"}
     )
     assert mock_response.status_code == 200
-    
+
     # Create a dummy file
     files = {"file": ("test.wav", b"dummy audio content", "audio/wav")}
     response = client.post("/transcribe", files=files)
     assert response.status_code == 200
     data = response.json()
     assert data["transcript"] == "Hello, how are you?"
-    
+
     # Disable mock for other tests
     client.post("/testability/mock", json={"enabled": False})
