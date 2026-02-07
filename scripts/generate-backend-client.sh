@@ -42,6 +42,8 @@ else
 fi
 
 if [ -f "$OUTPUT_FILE" ]; then
+  # Normalize version string for consistent output (CI uses v2.5.1, Nix may use 2.5.1)
+  sed 's/version 2\.5\.1/version v2.5.1/' "$OUTPUT_FILE" > "${OUTPUT_FILE}.tmp" && mv "${OUTPUT_FILE}.tmp" "$OUTPUT_FILE"
   echo "✅ Generated: $OUTPUT_FILE"
 else
   echo "❌ Error: Failed to generate Go client"
