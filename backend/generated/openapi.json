@@ -40,13 +40,50 @@
     "/transcribe": {
       "post": {
         "summary": "Transcribe",
-        "description": "Transcribe audio file - currently returns hardcoded response.",
+        "description": "Transcribe audio file using OpenAI API.",
         "operationId": "transcribe_transcribe_post",
         "requestBody": {
           "content": {
             "multipart/form-data": {
               "schema": {
                 "$ref": "#/components/schemas/Body_transcribe_transcribe_post"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/testability/mock": {
+      "post": {
+        "summary": "Set Mock",
+        "description": "Testability endpoint: Configure mocked responses.",
+        "operationId": "set_mock_testability_mock_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MockConfig"
               }
             }
           },
@@ -103,6 +140,24 @@
         },
         "type": "object",
         "title": "HTTPValidationError"
+      },
+      "MockConfig": {
+        "properties": {
+          "enabled": {
+            "type": "boolean",
+            "title": "Enabled"
+          },
+          "transcript": {
+            "type": "string",
+            "title": "Transcript",
+            "default": ""
+          }
+        },
+        "type": "object",
+        "required": [
+          "enabled"
+        ],
+        "title": "MockConfig"
       },
       "ValidationError": {
         "properties": {
