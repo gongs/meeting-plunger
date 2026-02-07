@@ -110,6 +110,23 @@
           }
         }
       }
+    },
+    "/testability/reset-db": {
+      "post": {
+        "summary": "Reset Db",
+        "description": "Testability endpoint: Reset database (drop and recreate all tables).",
+        "operationId": "reset_db_testability_reset_db_post",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
