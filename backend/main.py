@@ -4,8 +4,16 @@ from openai import OpenAI
 from pydantic import BaseModel
 
 from config import OPENAI_API_KEY
+from database import Base, engine
 
 app = FastAPI(title="Meeting Plunger API")
+
+
+@app.on_event("startup")
+def startup():
+    """Ensure database schema exists."""
+    Base.metadata.create_all(bind=engine)
+
 
 # Initialize OpenAI client
 openai_client = OpenAI(api_key=OPENAI_API_KEY)
@@ -66,6 +74,14 @@ async def set_mock(config: MockConfig):
     global mock_config
     mock_config = config
     return {"status": "ok", "mock_enabled": mock_config.enabled}
+
+
+@app.post("/testability/reset-db")
+async def reset_db():
+    """Testability endpoint: Reset database (drop and recreate all tables)."""
+    Base.metadata.drop_all(bind=engine)
+    Base.metadata.create_all(bind=engine)
+    return {"status": "ok"}
 
 
 if __name__ == "__main__":

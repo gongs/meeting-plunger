@@ -42,8 +42,7 @@ def test_transcribe_endpoint():
     """Test the transcribe endpoint with mock enabled."""
     # Enable mock with expected transcript
     mock_response = client.post(
-        "/testability/mock",
-        json={"enabled": True, "transcript": "Hello, how are you?"}
+        "/testability/mock", json={"enabled": True, "transcript": "Hello, how are you?"}
     )
     assert mock_response.status_code == 200
 
@@ -56,3 +55,11 @@ def test_transcribe_endpoint():
 
     # Disable mock for other tests
     client.post("/testability/mock", json={"enabled": False})
+
+
+def test_reset_db():
+    """Test the reset-db testability endpoint."""
+    response = client.post("/testability/reset-db")
+    assert response.status_code == 200
+    data = response.json()
+    assert data["status"] == "ok"

@@ -8,5 +8,8 @@ load_dotenv()
 # OpenAI Configuration
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
+# Database Configuration
+DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./meeting_plunger.db")
+
 # Note: OPENAI_API_KEY validation is deferred to runtime when actually needed.
 # This allows importing the module (e.g., for OpenAPI schema generation) without requiring the key.

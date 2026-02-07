@@ -39,6 +39,15 @@ Before(async function (this: CustomWorld) {
   await this.init();
 });
 
+Before(async function () {
+  const response = await fetch('http://localhost:8000/testability/reset-db', {
+    method: 'POST',
+  });
+  if (!response.ok) {
+    throw new Error(`Failed to reset database: ${response.status}`);
+  }
+});
+
 // Hook for scenarios with @useMockedOpenAIServiceInBackend tag
 Before({ tags: '@useMockedOpenAIServiceInBackend' }, async function (this: CustomWorld) {
   // Call backend testability endpoint to enable mock
