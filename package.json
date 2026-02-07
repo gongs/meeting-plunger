@@ -4,7 +4,7 @@
   "description": "Meeting Plunger - AI-powered meeting assistant",
   "private": true,
   "scripts": {
-    "sut": "concurrently --names \"backend,local-service,frontend\" --prefix-colors \"blue,magenta,green\" \"pnpm sut:backend\" \"pnpm sut:local-service\" \"pnpm sut:frontend\"",
+    "sut": "concurrently --names \"backend,frontend\" --prefix-colors \"blue,green\" \"pnpm sut:backend\" \"pnpm sut:frontend\"",
     "sut:backend": "cd backend && (test -f .venv/bin/uvicorn && .venv/bin/uvicorn main:app --reload || uvicorn main:app --reload)",
     "sut:frontend": "cd frontend && pnpm dev",
     "sut:local-service": "cd local-service && air",

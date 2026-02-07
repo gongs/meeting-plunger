@@ -23,7 +23,7 @@ nix develop -c pnpm e2e:headed
 nix develop -c pnpm e2e:debug
 ```
 
-**Note**: Both backend and client services must be running. Use `nix develop -c pnpm sut` to start both services.
+**Note**: Backend and frontend must be running. Use `nix develop -c pnpm sut` to start both services.
 
 ## Project Structure
 
