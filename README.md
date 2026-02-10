@@ -1,7 +1,7 @@
 # Meeting Plunger
 
 Meeting Plunger exists to turn messy meeting audio into usable, trustworthy meeting minutes with minimal human effort.
-
+  
 A monorepo project with:
 - **Backend**: Python FastAPI server (deployed on k8s) - handles AI transcription
 - **Frontend**: Vue.js 3 web interface (localhost:3000) - browser UI
