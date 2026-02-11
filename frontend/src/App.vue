@@ -5,6 +5,7 @@
       <nav class="nav">
         <RouterLink class="nav-link" to="/">Transcribe</RouterLink>
         <RouterLink class="nav-link" to="/racing">Racing</RouterLink>
+        <RouterLink class="nav-link" to="/venues">多人赛车</RouterLink>
       </nav>
     </header>
 

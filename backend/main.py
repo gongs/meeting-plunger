@@ -4,15 +4,27 @@ from openai import OpenAI
 from pydantic import BaseModel
 
 from config import OPENAI_API_KEY
-from database import Base, engine
+from database import Base, engine, SessionLocal
+from models.venue import Venue
+from routers.auth import router as auth_router
+from routers.venues import router as venues_router
 
 app = FastAPI(title="Meeting Plunger API")
+app.include_router(auth_router)
+app.include_router(venues_router)
 
 
 @app.on_event("startup")
 def startup():
-    """Ensure database schema exists."""
+    """Ensure database schema exists and default venue exists."""
     Base.metadata.create_all(bind=engine)
+    db = SessionLocal()
+    try:
+        if db.query(Venue).count() == 0:
+            db.add(Venue(name="默认赛场"))
+            db.commit()
+    finally:
+        db.close()
 
 
 # Initialize OpenAI client
@@ -81,6 +93,13 @@ async def reset_db():
     """Testability endpoint: Reset database (drop and recreate all tables)."""
     Base.metadata.drop_all(bind=engine)
     Base.metadata.create_all(bind=engine)
+    db = SessionLocal()
+    try:
+        if db.query(Venue).count() == 0:
+            db.add(Venue(name="默认赛场"))
+            db.commit()
+    finally:
+        db.close()
     return {"status": "ok"}
 
 
