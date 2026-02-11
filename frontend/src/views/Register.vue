@@ -46,6 +46,19 @@ const password = ref('');
 const error = ref('');
 const loading = ref(false);
 
+function formatError(res: Response, data: { detail?: string | unknown }): string {
+  if (data.detail !== undefined && data.detail !== null) {
+    if (typeof data.detail === 'string') return data.detail;
+    if (Array.isArray(data.detail)) {
+      const msgs = (data.detail as { msg?: string }[]).map((e) => e.msg ?? '').filter(Boolean);
+      return msgs.length ? msgs.join('；') : '请求参数无效';
+    }
+  }
+  if (res.status === 502 || res.status === 504) return '网络错误，请确认后端已启动 (pnpm sut)';
+  if (res.status === 500 && typeof data.detail === 'string') return data.detail;
+  return res.statusText || '注册失败';
+}
+
 async function onSubmit() {
   error.value = '';
   loading.value = true;
@@ -53,15 +66,17 @@ async function onSubmit() {
     const res = await fetch('/auth/register', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username: username.value, password: password.value }),
+      body: JSON.stringify({ username: username.value.trim(), password: password.value }),
     });
-    const data = await res.json().catch(() => ({})) as { detail?: string };
+    const data = (await res.json().catch(() => ({}))) as { detail?: string | unknown };
     if (!res.ok) {
-      error.value = data.detail ?? '注册失败';
+      error.value = formatError(res, data);
       return;
     }
-    setToken(data.token);
+    setToken((data as { token: string }).token);
     await router.push('/venues');
+  } catch (_e) {
+    error.value = '网络错误，请确认后端已启动 (端口 8000)';
   } finally {
     loading.value = false;
   }

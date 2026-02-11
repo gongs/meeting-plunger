@@ -14,6 +14,13 @@ app.include_router(auth_router)
 app.include_router(venues_router)
 
 
+def _get_openai_client():
+    """Lazy init so app can start without OPENAI_API_KEY (e.g. for auth/racing only)."""
+    if not OPENAI_API_KEY:
+        raise ValueError("OPENAI_API_KEY is not set; required for transcription")
+    return OpenAI(api_key=OPENAI_API_KEY)
+
+
 @app.on_event("startup")
 def startup():
     """Ensure database schema exists and default venue exists."""
@@ -27,10 +34,6 @@ def startup():
         db.close()
 
 
-# Initialize OpenAI client
-openai_client = OpenAI(api_key=OPENAI_API_KEY)
-
-
 # Testability: Mock control
 class MockConfig(BaseModel):
     enabled: bool
@@ -39,10 +42,13 @@ class MockConfig(BaseModel):
 
 mock_config = MockConfig(enabled=False)
 
-# Configure CORS for local development
+# Configure CORS for local development (Vite frontend on 3000)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:*"],
+    allow_origins=[
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -72,8 +78,9 @@ async def transcribe(file: UploadFile = File(...)):  # noqa: B008
     # Create a temporary file-like object for OpenAI API
     audio_file = (file.filename, audio_content, file.content_type)
 
-    # Call OpenAI Transcription API
-    transcript = openai_client.audio.transcriptions.create(
+    # Call OpenAI Transcription API (client created only when needed)
+    client = _get_openai_client()
+    transcript = client.audio.transcriptions.create(
         model="gpt-4o-mini-transcribe", file=audio_file
     )
 
