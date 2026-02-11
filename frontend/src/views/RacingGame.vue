@@ -56,6 +56,28 @@
         {{ lastDamage === null ? '—' : `Damage +${lastDamage}` }}
       </div>
 
+      <div class="track" aria-label="Track">
+        <div
+          v-for="i in trackCells"
+          :key="i"
+          class="cell"
+          :class="{ active: i === carPos }"
+          data-testid="track-cell"
+        >
+          <span class="cell-index">{{ i + 1 }}</span>
+        </div>
+
+        <div
+          class="car"
+          data-testid="car"
+          :data-pos="String(carPos)"
+          :style="carStyle"
+          aria-hidden="true"
+        >
+          🚗
+        </div>
+      </div>
+
       <button
         class="primary"
         type="button"
@@ -69,10 +91,10 @@
 </template>
 
 <script setup lang="ts">
-import { reactive, ref } from 'vue';
+import { computed, reactive, ref } from 'vue';
 import type { GameState } from '../racing/engine';
 import type { Mode } from '../racing/engine';
-import { createInitialState, roll } from '../racing/engine';
+import { createInitialState, roll, TRACK_LENGTH } from '../racing/engine';
 
 const props = defineProps<{
   diceRoller?: () => number;
@@ -85,6 +107,18 @@ const mode = ref<Mode>('normal');
 const lastDice = ref<number | null>(null);
 const lastSteps = ref<number | null>(null);
 const lastDamage = ref<number | null>(null);
+const carPos = computed(() =>
+  Math.max(0, Math.min(TRACK_LENGTH - 1, state.position))
+);
+const trackCells = computed(() =>
+  Array.from({ length: TRACK_LENGTH }, (_, i) => i)
+);
+const carStyle = computed(() => {
+  const columns = 11;
+  const row = Math.floor(carPos.value / columns) + 1;
+  const col = (carPos.value % columns) + 1;
+  return { gridRow: String(row), gridColumn: String(col) };
+});
 
 const onRoll = () => {
   const dice = diceRoller();
@@ -182,6 +216,43 @@ const onRoll = () => {
   margin: 4px 0 14px;
   font-size: 13px;
   color: rgba(0, 0, 0, 0.7);
+}
+
+.track {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(11, minmax(0, 1fr));
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.cell {
+  aspect-ratio: 1 / 1;
+  border-radius: 14px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  background: rgba(0, 0, 0, 0.02);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cell.active {
+  border-color: rgba(0, 102, 204, 0.5);
+  background: rgba(0, 102, 204, 0.12);
+}
+
+.cell-index {
+  font-size: 12px;
+  color: rgba(0, 0, 0, 0.55);
+  font-weight: 700;
+}
+
+.car {
+  display: grid;
+  place-items: center;
+  font-size: 20px;
+  line-height: 1;
+  pointer-events: none;
 }
 
 .primary {

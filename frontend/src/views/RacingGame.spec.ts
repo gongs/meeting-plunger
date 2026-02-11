@@ -48,5 +48,19 @@ describe('RacingGame', () => {
     expect(wrapper.get('[data-testid="condition"]').text()).toContain('5');
     expect(wrapper.get('[data-testid="damage"]').text()).toContain('Damage +1');
   });
+
+  it('renders a 22-step track and marks the current position', async () => {
+    const wrapper = mount(RacingGame, {
+      props: {
+        diceRoller: () => 2,
+      },
+    });
+
+    expect(wrapper.findAll('[data-testid="track-cell"]').length).toBe(22);
+    expect(wrapper.get('[data-testid="car"]').attributes('data-pos')).toBe('0');
+
+    await wrapper.get('[data-testid="roll"]').trigger('click');
+    expect(wrapper.get('[data-testid="car"]').attributes('data-pos')).toBe('2');
+  });
 });
 
