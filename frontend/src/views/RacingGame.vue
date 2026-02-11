@@ -83,15 +83,25 @@
         <span v-else>Game over.</span>
       </div>
 
-      <button
-        class="primary"
-        type="button"
-        data-testid="roll"
-        :disabled="status !== 'playing'"
-        @click="onRoll"
-      >
-        Roll dice
-      </button>
+      <div class="actions">
+        <button
+          class="primary"
+          type="button"
+          data-testid="roll"
+          :disabled="status !== 'playing'"
+          @click="onRoll"
+        >
+          Roll dice
+        </button>
+        <button
+          class="secondary"
+          type="button"
+          data-testid="restart"
+          @click="onRestart"
+        >
+          Restart
+        </button>
+      </div>
     </section>
   </div>
 </template>
@@ -143,6 +153,18 @@ const onRoll = () => {
 
   if (result.won) status.value = 'won';
   else if (result.gameOver) status.value = 'gameOver';
+};
+
+const onRestart = () => {
+  const next = createInitialState();
+  state.position = next.position;
+  state.condition = next.condition;
+
+  mode.value = 'normal';
+  status.value = 'playing';
+  lastDice.value = null;
+  lastSteps.value = null;
+  lastDamage.value = null;
 };
 </script>
 
@@ -277,6 +299,12 @@ const onRoll = () => {
   font-weight: 900;
 }
 
+.actions {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px;
+}
+
 .primary {
   width: 100%;
   padding: 12px 14px;
@@ -300,5 +328,18 @@ const onRoll = () => {
 
 .primary:active {
   transform: translateY(1px);
+}
+
+.secondary {
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: rgba(0, 0, 0, 0.04);
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.secondary:hover {
+  background: rgba(0, 0, 0, 0.06);
 }
 </style>

@@ -90,5 +90,24 @@ describe('RacingGame', () => {
     expect(wrapper.get('[data-testid="result"]').text()).toContain('Game over');
     expect(wrapper.get('[data-testid="roll"]').attributes('disabled')).toBeDefined();
   });
+
+  it('restarts the game', async () => {
+    const wrapper = mount(RacingGame, {
+      props: {
+        diceRoller: () => 1,
+      },
+    });
+
+    await wrapper.get('[data-testid="roll"]').trigger('click');
+    expect(wrapper.get('[data-testid="position"]').text()).toContain('1');
+    expect(wrapper.get('[data-testid="condition"]').text()).toContain('5');
+
+    await wrapper.get('[data-testid="restart"]').trigger('click');
+    expect(wrapper.get('[data-testid="position"]').text()).toContain('0');
+    expect(wrapper.get('[data-testid="condition"]').text()).toContain('6');
+    expect(wrapper.get('[data-testid="dice"]').text()).toContain('—');
+    expect(wrapper.get('[data-testid="steps"]').text()).toContain('—');
+    expect(wrapper.get('[data-testid="roll"]').attributes('disabled')).toBeUndefined();
+  });
 });
 
