@@ -4,17 +4,11 @@ export { INITIAL_CONDITION, TRACK_LENGTH } from './types';
 import type { GameState, Mode, RollResult } from './types';
 import { INITIAL_CONDITION, TRACK_LENGTH } from './types';
 
-export function advanceSteps(mode: Mode, dice: number): number {
+export function advanceSteps(mode: Mode, dice: number, condition: number): number {
   if (mode === 'normal') {
     return dice % 2 === 0 ? 2 : 1;
   }
-
-  return dice;
-}
-
-export function applyDamage(condition: number, dice: number): number {
-  if (dice === 1) return condition - 1;
-  return condition;
+  return Math.min(dice, Math.max(0, condition));
 }
 
 export function hasWon(position: number): boolean {
@@ -30,9 +24,10 @@ export function createInitialState(): GameState {
 }
 
 export function roll(state: GameState, mode: Mode, dice: number): RollResult {
-  const steps = advanceSteps(mode, dice);
+  const steps = advanceSteps(mode, dice, state.condition);
   const newPosition = state.position + steps;
-  const newCondition = applyDamage(state.condition, dice);
+  const newCondition =
+    mode === 'super' ? state.condition - 1 : state.condition;
   const won = hasWon(newPosition);
   const gameOver = !won && isGameOver(newCondition);
 

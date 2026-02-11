@@ -70,7 +70,7 @@ nix develop -c pnpm e2e
 
 Frontend entrypoints:
 - Transcription UI: `http://localhost:3000/`
-- Racing game: `http://localhost:3000/racing`
+- Racing game: `http://localhost:3000/racing` (Normal: no condition loss; Super: steps = min(dice, condition), 1 condition loss per roll, cannot switch back to Normal)
 
 **Alternative:** Use `nix develop` or `direnv allow` to enter the environment, then run commands directly.
 

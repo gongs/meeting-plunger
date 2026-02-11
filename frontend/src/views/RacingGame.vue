@@ -4,8 +4,9 @@
       <div>
         <h1 class="title">Racing Game</h1>
         <p class="subtitle">
-          Normal: odd → 1 step, even → 2 steps. Super: steps = dice. Rolling 1
-          causes 1 damage.
+          Normal: odd → 1, even → 2 steps; no condition loss. Super: steps =
+          min(dice, condition), 1 condition loss per roll; once Super, you
+          cannot switch back.
         </p>
       </div>
     </header>
@@ -17,6 +18,8 @@
           :class="{ active: mode === 'normal' }"
           type="button"
           data-testid="mode-normal"
+          :disabled="mode === 'super'"
+          :aria-disabled="mode === 'super'"
           @click="mode = 'normal'"
         >
           Normal
@@ -166,7 +169,8 @@ const onRoll = () => {
   lastSteps.value = result.steps;
   state.position = result.newPosition;
   state.condition = result.newCondition;
-  lastDamage.value = Math.max(0, beforeCondition - result.newCondition);
+  lastDamage.value =
+    mode.value === 'super' && result.newCondition < beforeCondition ? 1 : null;
 
   if (result.won) status.value = 'won';
   else if (result.gameOver) status.value = 'gameOver';
@@ -237,6 +241,11 @@ const onRestart = () => {
   background: rgba(255, 255, 255, 0.9);
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
   color: rgba(0, 0, 0, 0.95);
+}
+
+.seg:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
 }
 
 .stats {
@@ -323,6 +332,7 @@ const onRestart = () => {
   font-size: 20px;
   line-height: 1;
   pointer-events: none;
+  transform: scaleX(-1); /* 车头水平翻转 */
 }
 
 .car.damaged {

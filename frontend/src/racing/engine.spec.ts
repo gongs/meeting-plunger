@@ -1,7 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import {
   advanceSteps,
-  applyDamage,
   createInitialState,
   hasWon,
   isGameOver,
@@ -12,36 +11,33 @@ import {
 
 describe('advanceSteps', () => {
   it('moves 1 step on odd dice in normal mode', () => {
-    expect(advanceSteps('normal', 1)).toBe(1);
-    expect(advanceSteps('normal', 3)).toBe(1);
-    expect(advanceSteps('normal', 5)).toBe(1);
+    expect(advanceSteps('normal', 1, 6)).toBe(1);
+    expect(advanceSteps('normal', 3, 6)).toBe(1);
+    expect(advanceSteps('normal', 5, 6)).toBe(1);
   });
 
   it('moves 2 steps on even dice in normal mode', () => {
-    expect(advanceSteps('normal', 2)).toBe(2);
-    expect(advanceSteps('normal', 4)).toBe(2);
-    expect(advanceSteps('normal', 6)).toBe(2);
+    expect(advanceSteps('normal', 2, 6)).toBe(2);
+    expect(advanceSteps('normal', 4, 6)).toBe(2);
+    expect(advanceSteps('normal', 6, 6)).toBe(2);
   });
 
-  it('moves N steps on dice value in super mode', () => {
-    expect(advanceSteps('super', 1)).toBe(1);
-    expect(advanceSteps('super', 2)).toBe(2);
-    expect(advanceSteps('super', 6)).toBe(6);
+  it('moves min(dice, condition) steps in super mode', () => {
+    expect(advanceSteps('super', 1, 6)).toBe(1);
+    expect(advanceSteps('super', 2, 6)).toBe(2);
+    expect(advanceSteps('super', 6, 6)).toBe(6);
+    expect(advanceSteps('super', 6, 3)).toBe(3);
+    expect(advanceSteps('super', 5, 2)).toBe(2);
+  });
+
+  it('returns 0 steps in super mode when condition is 0', () => {
+    expect(advanceSteps('super', 6, 0)).toBe(0);
   });
 });
 
-describe('applyDamage', () => {
+describe('INITIAL_CONDITION', () => {
   it('starts with 6 condition points', () => {
     expect(INITIAL_CONDITION).toBe(6);
-  });
-
-  it('decreases condition by 1 when dice is 1', () => {
-    expect(applyDamage(6, 1)).toBe(5);
-  });
-
-  it('does not change condition when dice is not 1', () => {
-    expect(applyDamage(6, 2)).toBe(6);
-    expect(applyDamage(6, 6)).toBe(6);
   });
 });
 
@@ -68,24 +64,31 @@ describe('roll', () => {
     expect(createInitialState()).toEqual({ position: 0, condition: 6 });
   });
 
-  it('applies normal-mode steps and damage', () => {
+  it('applies normal-mode steps and no condition damage', () => {
     const result = roll(createInitialState(), 'normal', 1);
     expect(result).toEqual({
       steps: 1,
       newPosition: 1,
-      newCondition: 5,
+      newCondition: 6,
       won: false,
       gameOver: false,
     });
   });
 
-  it('applies super-mode steps and damage', () => {
+  it('applies super-mode steps and 1 condition damage per roll', () => {
     const result = roll(createInitialState(), 'super', 6);
     expect(result.steps).toBe(6);
     expect(result.newPosition).toBe(6);
-    expect(result.newCondition).toBe(6);
+    expect(result.newCondition).toBe(5);
     expect(result.won).toBe(false);
     expect(result.gameOver).toBe(false);
+  });
+
+  it('caps super-mode steps by condition when dice > condition', () => {
+    const result = roll({ position: 0, condition: 3 }, 'super', 6);
+    expect(result.steps).toBe(3);
+    expect(result.newPosition).toBe(3);
+    expect(result.newCondition).toBe(2);
   });
 
   it('wins when reaching or passing the finish line', () => {
@@ -94,10 +97,11 @@ describe('roll', () => {
     expect(result.gameOver).toBe(false);
   });
 
-  it('ends the game when condition reaches 0 before winning', () => {
-    const result = roll({ position: 0, condition: 1 }, 'normal', 1);
+  it('ends the game when condition reaches 0 before winning in super mode', () => {
+    const result = roll({ position: 0, condition: 1 }, 'super', 1);
     expect(result.won).toBe(false);
     expect(result.gameOver).toBe(true);
+    expect(result.newCondition).toBe(0);
   });
 
   it('treats reaching the finish line as a win even if condition drops to 0', () => {

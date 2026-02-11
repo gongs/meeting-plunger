@@ -34,17 +34,23 @@ describe('RacingGame', () => {
     expect(wrapper.get('[data-testid="position"]').text()).toContain('3');
   });
 
-  it('shows condition and decreases it when dice is 1', async () => {
+  it('does not decrease condition in normal mode', async () => {
     const wrapper = mount(RacingGame, {
-      props: {
-        diceRoller: () => 1,
-      },
+      props: { diceRoller: () => 1 },
     });
-
     expect(wrapper.get('[data-testid="condition"]').text()).toContain('6');
-
     await wrapper.get('[data-testid="roll"]').trigger('click');
+    expect(wrapper.get('[data-testid="condition"]').text()).toContain('6');
+    expect(wrapper.get('[data-testid="damage"]').text()).toContain('—');
+  });
 
+  it('decreases condition by 1 per roll in super mode', async () => {
+    const wrapper = mount(RacingGame, {
+      props: { diceRoller: () => 1 },
+    });
+    expect(wrapper.get('[data-testid="condition"]').text()).toContain('6');
+    await wrapper.get('[data-testid="mode-super"]').trigger('click');
+    await wrapper.get('[data-testid="roll"]').trigger('click');
     expect(wrapper.get('[data-testid="condition"]').text()).toContain('5');
     expect(wrapper.get('[data-testid="damage"]').text()).toContain('Damage +1');
   });
@@ -77,27 +83,24 @@ describe('RacingGame', () => {
     expect(wrapper.get('[data-testid="roll"]').attributes('disabled')).toBeDefined();
   });
 
-  it('shows game over state and disables rolling', async () => {
+  it('shows game over state and disables rolling in super mode', async () => {
     const wrapper = mount(RacingGame, {
       props: {
         diceRoller: () => 1,
         initialState: { position: 0, condition: 1 },
       },
     });
-
+    await wrapper.get('[data-testid="mode-super"]').trigger('click');
     await wrapper.get('[data-testid="roll"]').trigger('click');
-
     expect(wrapper.get('[data-testid="result"]').text()).toContain('Game over');
     expect(wrapper.get('[data-testid="roll"]').attributes('disabled')).toBeDefined();
   });
 
   it('restarts the game', async () => {
     const wrapper = mount(RacingGame, {
-      props: {
-        diceRoller: () => 1,
-      },
+      props: { diceRoller: () => 1 },
     });
-
+    await wrapper.get('[data-testid="mode-super"]').trigger('click');
     await wrapper.get('[data-testid="roll"]').trigger('click');
     expect(wrapper.get('[data-testid="position"]').text()).toContain('1');
     expect(wrapper.get('[data-testid="condition"]').text()).toContain('5');
@@ -108,6 +111,15 @@ describe('RacingGame', () => {
     expect(wrapper.get('[data-testid="dice"]').text()).toContain('—');
     expect(wrapper.get('[data-testid="steps"]').text()).toContain('—');
     expect(wrapper.get('[data-testid="roll"]').attributes('disabled')).toBeUndefined();
+  });
+
+  it('cannot switch back to Normal after selecting Super', async () => {
+    const wrapper = mount(RacingGame, { props: { diceRoller: () => 2 } });
+    expect(wrapper.get('[data-testid="mode-normal"]').attributes('disabled')).toBeUndefined();
+    await wrapper.get('[data-testid="mode-super"]').trigger('click');
+    expect(wrapper.get('[data-testid="mode-normal"]').attributes('disabled')).toBeDefined();
+    await wrapper.get('[data-testid="roll"]').trigger('click');
+    expect(wrapper.get('[data-testid="mode-normal"]').attributes('disabled')).toBeDefined();
   });
 });
 
