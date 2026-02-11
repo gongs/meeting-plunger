@@ -68,6 +68,10 @@ nix develop -c pnpm sut
 nix develop -c pnpm e2e
 ```
 
+Frontend entrypoints:
+- Transcription UI: `http://localhost:3000/`
+- Racing game: `http://localhost:3000/racing`
+
 **Alternative:** Use `nix develop` or `direnv allow` to enter the environment, then run commands directly.
 
 See [docs/QUICK_START.md](docs/QUICK_START.md) for more details.
