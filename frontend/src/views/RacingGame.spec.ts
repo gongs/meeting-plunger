@@ -62,5 +62,33 @@ describe('RacingGame', () => {
     await wrapper.get('[data-testid="roll"]').trigger('click');
     expect(wrapper.get('[data-testid="car"]').attributes('data-pos')).toBe('2');
   });
+
+  it('shows win state and disables rolling', async () => {
+    const wrapper = mount(RacingGame, {
+      props: {
+        diceRoller: () => 2,
+        initialState: { position: 21, condition: 6 },
+      },
+    });
+
+    await wrapper.get('[data-testid="roll"]').trigger('click');
+
+    expect(wrapper.get('[data-testid="result"]').text()).toContain('You win');
+    expect(wrapper.get('[data-testid="roll"]').attributes('disabled')).toBeDefined();
+  });
+
+  it('shows game over state and disables rolling', async () => {
+    const wrapper = mount(RacingGame, {
+      props: {
+        diceRoller: () => 1,
+        initialState: { position: 0, condition: 1 },
+      },
+    });
+
+    await wrapper.get('[data-testid="roll"]').trigger('click');
+
+    expect(wrapper.get('[data-testid="result"]').text()).toContain('Game over');
+    expect(wrapper.get('[data-testid="roll"]').attributes('disabled')).toBeDefined();
+  });
 });
 

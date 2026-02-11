@@ -78,10 +78,16 @@
         </div>
       </div>
 
+      <div v-if="status !== 'playing'" class="result" data-testid="result">
+        <span v-if="status === 'won'">You win!</span>
+        <span v-else>Game over.</span>
+      </div>
+
       <button
         class="primary"
         type="button"
         data-testid="roll"
+        :disabled="status !== 'playing'"
         @click="onRoll"
       >
         Roll dice
@@ -98,15 +104,17 @@ import { createInitialState, roll, TRACK_LENGTH } from '../racing/engine';
 
 const props = defineProps<{
   diceRoller?: () => number;
+  initialState?: GameState;
 }>();
 
 const diceRoller = props.diceRoller ?? (() => Math.floor(Math.random() * 6) + 1);
 
-const state = reactive<GameState>(createInitialState());
+const state = reactive<GameState>({ ...(props.initialState ?? createInitialState()) });
 const mode = ref<Mode>('normal');
 const lastDice = ref<number | null>(null);
 const lastSteps = ref<number | null>(null);
 const lastDamage = ref<number | null>(null);
+const status = ref<'playing' | 'won' | 'gameOver'>('playing');
 const carPos = computed(() =>
   Math.max(0, Math.min(TRACK_LENGTH - 1, state.position))
 );
@@ -121,6 +129,8 @@ const carStyle = computed(() => {
 });
 
 const onRoll = () => {
+  if (status.value !== 'playing') return;
+
   const dice = diceRoller();
   const beforeCondition = state.condition;
   const result = roll(state, mode.value, dice);
@@ -130,6 +140,9 @@ const onRoll = () => {
   state.position = result.newPosition;
   state.condition = result.newCondition;
   lastDamage.value = Math.max(0, beforeCondition - result.newCondition);
+
+  if (result.won) status.value = 'won';
+  else if (result.gameOver) status.value = 'gameOver';
 };
 </script>
 
@@ -255,6 +268,15 @@ const onRoll = () => {
   pointer-events: none;
 }
 
+.result {
+  margin: 0 0 14px;
+  padding: 12px 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  background: rgba(0, 0, 0, 0.03);
+  font-weight: 900;
+}
+
 .primary {
   width: 100%;
   padding: 12px 14px;
@@ -269,6 +291,11 @@ const onRoll = () => {
 
 .primary:hover {
   filter: brightness(0.98);
+}
+
+.primary:disabled {
+  cursor: not-allowed;
+  background: rgba(0, 0, 0, 0.22);
 }
 
 .primary:active {
