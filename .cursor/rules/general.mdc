@@ -56,6 +56,8 @@ nix develop -c pnpm sut:frontend  # Frontend only
 3. **Make changes** to code
 4. **Re-run tests**: Services auto-reload
 
+**TDD + 提交**：开发时先写/改测试（红）→ 最小实现（绿）→ 按计划小步提交。详见 `rules/tdd-and-commits.mdc`。
+
 ## Testing
 
 - Feature files: `e2e/features/*.feature`

@@ -1,0 +1,38 @@
+---
+description: TDD 开发流程与 Git 提交规范
+alwaysApply: true
+---
+
+# TDD 与 Git 提交规范
+
+本项目按 **测试驱动开发（TDD）** 进行开发，并采用 **小步、按计划提交** 的 Git 策略。参见 `docs/initial_working_agreement.md`。
+
+## TDD 流程（必须遵守）
+
+1. **先写/改测试**：根据需求或计划，先新增或修改测试用例，运行测试得到 **红**（失败）。
+2. **最小实现**：用最少代码使当前测试 **绿**（通过），不提前实现未覆盖功能。
+3. **重构**：绿之后如需整理代码，可重构，并保持测试全绿。
+4. **小步进行**：每个 TDD 循环只针对一个明确行为或边界，避免一次改很多。
+
+### 实施要点
+
+- 引擎/工具函数：在 `*.spec.ts` 中先写用例，再改 `engine.ts` 等实现。
+- UI/组件：在 `*.spec.ts` 或 E2E 中先写期望行为（如点击、文案、状态），再改 Vue 组件。
+- 跑测试命令（前端单元测试）：`nix develop -c pnpm --filter meeting-plunger-frontend exec -- pnpm run test`，或根目录 `nix develop -c pnpm test`（若已配置）。
+
+## Git 提交方式（按计划提交）
+
+- **按任务/计划小步提交**：每个提交对应计划中的一小步（例如「TDD: advanceSteps 超级模式步数」「UI: Super 不可逆」），不要在一个提交里混合多个无关改动。
+- **提交前**：确保相关测试通过（该次改动涉及的单元测试或 E2E）。
+- **提交信息格式**：
+  - 推荐：`类型(范围): 简短描述`，例如：
+    - `feat(racing): advanceSteps 支持 condition 参数，Super 步数=min(dice,condition)`
+    - `test(racing): 补充 Super 步数受 condition 上限的用例`
+    - `fix(ui): 选 Super 后 Normal 按钮禁用`
+  - 或按计划中的步骤命名：`TDD: 某功能` / `UI: 某交互`，保持同一分支上风格一致即可。
+- **不提交**：未通过测试的代码、临时调试、仅格式化且无逻辑变更可酌情不单独提交或与上一条合并说明。
+
+## 与计划配合
+
+- 若有 `.cursor/plans/*.plan.md` 或类似实现计划，实现顺序应按计划中的「实现顺序建议」进行。
+- 每完成计划中的一小步（如 1.1、2.1、3.1），即可做一次提交，便于回滚和 code review。
