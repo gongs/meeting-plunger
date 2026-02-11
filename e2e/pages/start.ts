@@ -1,5 +1,6 @@
 import { Page } from '@playwright/test';
 import { HomePage } from './HomePage.js';
+import { RacingPage } from './RacingPage.js';
 
 export class Start {
   constructor(private page: Page) {}
@@ -14,6 +15,18 @@ export class Start {
     const homePage = new HomePage(this.page);
     await homePage.assume();
     return homePage;
+  }
+
+  async openRacingPage(): Promise<RacingPage> {
+    const racingPage = new RacingPage(this.page);
+    await racingPage.open();
+    return racingPage;
+  }
+
+  async assumeRacingPage(): Promise<RacingPage> {
+    const racingPage = new RacingPage(this.page);
+    await racingPage.assume();
+    return racingPage;
   }
 }
 
