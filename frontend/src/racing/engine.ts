@@ -1,12 +1,8 @@
-export type Mode = 'normal' | 'super';
+export type { GameState, Mode, RollResult } from './types';
+export { INITIAL_CONDITION, TRACK_LENGTH } from './types';
 
-export const INITIAL_CONDITION = 6;
-export const TRACK_LENGTH = 22;
-
-export type GameState = {
-  position: number;
-  condition: number;
-};
+import type { GameState, Mode, RollResult } from './types';
+import { INITIAL_CONDITION, TRACK_LENGTH } from './types';
 
 export function advanceSteps(mode: Mode, dice: number): number {
   if (mode === 'normal') {
@@ -32,14 +28,6 @@ export function isGameOver(condition: number): boolean {
 export function createInitialState(): GameState {
   return { position: 0, condition: INITIAL_CONDITION };
 }
-
-export type RollResult = {
-  steps: number;
-  newPosition: number;
-  newCondition: number;
-  won: boolean;
-  gameOver: boolean;
-};
 
 export function roll(state: GameState, mode: Mode, dice: number): RollResult {
   const steps = advanceSteps(mode, dice);
