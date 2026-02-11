@@ -18,5 +18,20 @@ describe('RacingGame', () => {
     expect(wrapper.get('[data-testid="steps"]').text()).toContain('2');
     expect(wrapper.get('[data-testid="position"]').text()).toContain('2');
   });
+
+  it('uses super mode when selected', async () => {
+    const wrapper = mount(RacingGame, {
+      props: {
+        diceRoller: () => 3,
+      },
+    });
+
+    await wrapper.get('[data-testid="mode-super"]').trigger('click');
+    await wrapper.get('[data-testid="roll"]').trigger('click');
+
+    expect(wrapper.get('[data-testid="dice"]').text()).toContain('3');
+    expect(wrapper.get('[data-testid="steps"]').text()).toContain('3');
+    expect(wrapper.get('[data-testid="position"]').text()).toContain('3');
+  });
 });
 

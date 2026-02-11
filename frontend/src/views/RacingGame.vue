@@ -8,6 +8,27 @@
     </header>
 
     <section class="panel">
+      <div class="mode-row" role="group" aria-label="Mode">
+        <button
+          class="seg"
+          :class="{ active: mode === 'normal' }"
+          type="button"
+          data-testid="mode-normal"
+          @click="mode = 'normal'"
+        >
+          Normal
+        </button>
+        <button
+          class="seg"
+          :class="{ active: mode === 'super' }"
+          type="button"
+          data-testid="mode-super"
+          @click="mode = 'super'"
+        >
+          Super
+        </button>
+      </div>
+
       <div class="stats">
         <div class="stat">
           <div class="label">Position</div>
@@ -42,6 +63,7 @@
 <script setup lang="ts">
 import { reactive, ref } from 'vue';
 import type { GameState } from '../racing/engine';
+import type { Mode } from '../racing/engine';
 import { createInitialState, roll } from '../racing/engine';
 
 const props = defineProps<{
@@ -51,12 +73,13 @@ const props = defineProps<{
 const diceRoller = props.diceRoller ?? (() => Math.floor(Math.random() * 6) + 1);
 
 const state = reactive<GameState>(createInitialState());
+const mode = ref<Mode>('normal');
 const lastDice = ref<number | null>(null);
 const lastSteps = ref<number | null>(null);
 
 const onRoll = () => {
   const dice = diceRoller();
-  const result = roll(state, 'normal', dice);
+  const result = roll(state, mode.value, dice);
 
   lastDice.value = dice;
   lastSteps.value = result.steps;
@@ -91,6 +114,31 @@ const onRoll = () => {
   background: rgba(255, 255, 255, 0.9);
   padding: 16px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+}
+
+.mode-row {
+  display: inline-flex;
+  padding: 4px;
+  border-radius: 14px;
+  background: rgba(0, 0, 0, 0.04);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  margin-bottom: 12px;
+}
+
+.seg {
+  padding: 10px 12px;
+  border: 0;
+  border-radius: 12px;
+  background: transparent;
+  font-weight: 800;
+  cursor: pointer;
+  color: rgba(0, 0, 0, 0.75);
+}
+
+.seg.active {
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+  color: rgba(0, 0, 0, 0.95);
 }
 
 .stats {
