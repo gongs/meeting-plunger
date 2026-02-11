@@ -1,5 +1,12 @@
 import { describe, it, expect } from 'vitest';
-import { advanceSteps, applyDamage, INITIAL_CONDITION } from './engine';
+import {
+  advanceSteps,
+  applyDamage,
+  hasWon,
+  isGameOver,
+  INITIAL_CONDITION,
+  TRACK_LENGTH,
+} from './engine';
 
 describe('advanceSteps', () => {
   it('moves 1 step on odd dice in normal mode', () => {
@@ -33,6 +40,24 @@ describe('applyDamage', () => {
   it('does not change condition when dice is not 1', () => {
     expect(applyDamage(6, 2)).toBe(6);
     expect(applyDamage(6, 6)).toBe(6);
+  });
+});
+
+describe('end conditions', () => {
+  it('uses a track length of 22 steps', () => {
+    expect(TRACK_LENGTH).toBe(22);
+  });
+
+  it('wins when position is at or beyond the finish line', () => {
+    expect(hasWon(21)).toBe(false);
+    expect(hasWon(22)).toBe(true);
+    expect(hasWon(23)).toBe(true);
+  });
+
+  it('ends the game when condition reaches 0', () => {
+    expect(isGameOver(1)).toBe(false);
+    expect(isGameOver(0)).toBe(true);
+    expect(isGameOver(-1)).toBe(true);
   });
 });
 
