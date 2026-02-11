@@ -3,7 +3,10 @@
     <header class="hero">
       <div>
         <h1 class="title">Racing Game</h1>
-        <p class="subtitle">Roll the dice to advance your car.</p>
+        <p class="subtitle">
+          Normal: odd → 1 step, even → 2 steps. Super: steps = dice. Rolling 1
+          causes 1 damage.
+        </p>
       </div>
     </header>
 
@@ -37,6 +40,14 @@
         <div class="stat">
           <div class="label">Condition</div>
           <div class="value" data-testid="condition">{{ state.condition }}</div>
+          <div class="condition-bar" aria-hidden="true">
+            <span
+              v-for="i in 6"
+              :key="i"
+              class="pip"
+              :class="{ on: i <= state.condition }"
+            />
+          </div>
         </div>
         <div class="stat">
           <div class="label">Last dice</div>
@@ -52,7 +63,7 @@
         </div>
       </div>
 
-      <div class="hint" data-testid="damage">
+      <div class="hint" data-testid="damage" aria-live="polite">
         {{ lastDamage === null ? '—' : `Damage +${lastDamage}` }}
       </div>
 
@@ -73,12 +84,18 @@
           :data-pos="String(carPos)"
           :style="carStyle"
           aria-hidden="true"
+          :class="{ damaged: lastDamage !== null && lastDamage > 0 }"
         >
           🚗
         </div>
       </div>
 
-      <div v-if="status !== 'playing'" class="result" data-testid="result">
+      <div
+        v-if="status !== 'playing'"
+        class="result"
+        data-testid="result"
+        aria-live="polite"
+      >
         <span v-if="status === 'won'">You win!</span>
         <span v-else>Game over.</span>
       </div>
@@ -186,6 +203,7 @@ const onRestart = () => {
 .subtitle {
   margin: 6px 0 0;
   color: rgba(0, 0, 0, 0.7);
+  max-width: 68ch;
 }
 
 .panel {
@@ -247,6 +265,23 @@ const onRestart = () => {
   letter-spacing: -0.2px;
 }
 
+.condition-bar {
+  display: flex;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.pip {
+  height: 8px;
+  flex: 1 1 0;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.1);
+}
+
+.pip.on {
+  background: rgba(0, 102, 204, 0.55);
+}
+
 .hint {
   margin: 4px 0 14px;
   font-size: 13px;
@@ -288,6 +323,17 @@ const onRestart = () => {
   font-size: 20px;
   line-height: 1;
   pointer-events: none;
+}
+
+.car.damaged {
+  animation: shake 250ms ease-in-out;
+}
+
+.seg:focus-visible,
+.primary:focus-visible,
+.secondary:focus-visible {
+  outline: 3px solid rgba(0, 102, 204, 0.35);
+  outline-offset: 2px;
 }
 
 .result {
@@ -341,5 +387,23 @@ const onRestart = () => {
 
 .secondary:hover {
   background: rgba(0, 0, 0, 0.06);
+}
+
+@keyframes shake {
+  0% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-2px);
+  }
+  50% {
+    transform: translateX(2px);
+  }
+  75% {
+    transform: translateX(-1px);
+  }
+  100% {
+    transform: translateX(0);
+  }
 }
 </style>
