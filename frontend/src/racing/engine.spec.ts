@@ -13,5 +13,11 @@ describe('advanceSteps', () => {
     expect(advanceSteps('normal', 4)).toBe(2);
     expect(advanceSteps('normal', 6)).toBe(2);
   });
+
+  it('moves N steps on dice value in super mode', () => {
+    expect(advanceSteps('super', 1)).toBe(1);
+    expect(advanceSteps('super', 2)).toBe(2);
+    expect(advanceSteps('super', 6)).toBe(6);
+  });
 });
 
