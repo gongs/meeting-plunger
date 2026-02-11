@@ -35,6 +35,10 @@
           <div class="value" data-testid="position">{{ state.position }}</div>
         </div>
         <div class="stat">
+          <div class="label">Condition</div>
+          <div class="value" data-testid="condition">{{ state.condition }}</div>
+        </div>
+        <div class="stat">
           <div class="label">Last dice</div>
           <div class="value" data-testid="dice">
             {{ lastDice === null ? '—' : lastDice }}
@@ -46,6 +50,10 @@
             {{ lastSteps === null ? '—' : lastSteps }}
           </div>
         </div>
+      </div>
+
+      <div class="hint" data-testid="damage">
+        {{ lastDamage === null ? '—' : `Damage +${lastDamage}` }}
       </div>
 
       <button
@@ -76,15 +84,18 @@ const state = reactive<GameState>(createInitialState());
 const mode = ref<Mode>('normal');
 const lastDice = ref<number | null>(null);
 const lastSteps = ref<number | null>(null);
+const lastDamage = ref<number | null>(null);
 
 const onRoll = () => {
   const dice = diceRoller();
+  const beforeCondition = state.condition;
   const result = roll(state, mode.value, dice);
 
   lastDice.value = dice;
   lastSteps.value = result.steps;
   state.position = result.newPosition;
   state.condition = result.newCondition;
+  lastDamage.value = Math.max(0, beforeCondition - result.newCondition);
 };
 </script>
 
@@ -143,7 +154,7 @@ const onRoll = () => {
 
 .stats {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 12px;
   margin-bottom: 14px;
 }
@@ -165,6 +176,12 @@ const onRoll = () => {
   font-weight: 800;
   font-size: 22px;
   letter-spacing: -0.2px;
+}
+
+.hint {
+  margin: 4px 0 14px;
+  font-size: 13px;
+  color: rgba(0, 0, 0, 0.7);
 }
 
 .primary {
