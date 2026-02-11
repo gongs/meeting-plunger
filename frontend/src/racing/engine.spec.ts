@@ -2,9 +2,11 @@ import { describe, it, expect } from 'vitest';
 import {
   advanceSteps,
   applyDamage,
+  createInitialState,
   hasWon,
   isGameOver,
   INITIAL_CONDITION,
+  roll,
   TRACK_LENGTH,
 } from './engine';
 
@@ -58,6 +60,50 @@ describe('end conditions', () => {
     expect(isGameOver(1)).toBe(false);
     expect(isGameOver(0)).toBe(true);
     expect(isGameOver(-1)).toBe(true);
+  });
+});
+
+describe('roll', () => {
+  it('creates an initial state', () => {
+    expect(createInitialState()).toEqual({ position: 0, condition: 6 });
+  });
+
+  it('applies normal-mode steps and damage', () => {
+    const result = roll(createInitialState(), 'normal', 1);
+    expect(result).toEqual({
+      steps: 1,
+      newPosition: 1,
+      newCondition: 5,
+      won: false,
+      gameOver: false,
+    });
+  });
+
+  it('applies super-mode steps and damage', () => {
+    const result = roll(createInitialState(), 'super', 6);
+    expect(result.steps).toBe(6);
+    expect(result.newPosition).toBe(6);
+    expect(result.newCondition).toBe(6);
+    expect(result.won).toBe(false);
+    expect(result.gameOver).toBe(false);
+  });
+
+  it('wins when reaching or passing the finish line', () => {
+    const result = roll({ position: 21, condition: 6 }, 'super', 2);
+    expect(result.won).toBe(true);
+    expect(result.gameOver).toBe(false);
+  });
+
+  it('ends the game when condition reaches 0 before winning', () => {
+    const result = roll({ position: 0, condition: 1 }, 'normal', 1);
+    expect(result.won).toBe(false);
+    expect(result.gameOver).toBe(true);
+  });
+
+  it('treats reaching the finish line as a win even if condition drops to 0', () => {
+    const result = roll({ position: 21, condition: 1 }, 'super', 1);
+    expect(result.won).toBe(true);
+    expect(result.gameOver).toBe(false);
   });
 });
 
