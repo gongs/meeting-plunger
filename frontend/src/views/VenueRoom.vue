@@ -63,11 +63,48 @@
           Super
         </button>
       </div>
-      <div v-if="me && (me.won || me.game_over)" class="result" data-testid="result">
+      <div v-if="me && (me.won || me.game_over) && !roundComplete" class="result" data-testid="result">
         <span v-if="me.won">You win!</span>
         <span v-else>Game over.</span>
       </div>
+      <div v-if="roundComplete" class="ranking-section" data-testid="ranking-section">
+        <h2 class="ranking-title">第 {{ currentRound }} 轮排名</h2>
+        <table class="ranking-table">
+          <thead>
+            <tr>
+              <th>名次</th>
+              <th>用户名</th>
+              <th>结果</th>
+              <th>掷骰次数</th>
+              <th>用时(秒)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr
+              v-for="r in ranking"
+              :key="r.user_id"
+              :class="{ me: r.user_id === myUserId }"
+              data-testid="ranking-row"
+            >
+              <td>{{ r.rank }}</td>
+              <td>{{ r.username }}</td>
+              <td>{{ r.won ? '胜利' : '失败' }}</td>
+              <td>{{ r.roll_count }}</td>
+              <td>{{ r.duration_seconds.toFixed(1) }}</td>
+            </tr>
+          </tbody>
+        </table>
+        <button
+          type="button"
+          class="primary"
+          data-testid="start-new-race"
+          @click="onStartNewRace"
+        >
+          开始新比赛
+        </button>
+      </div>
       <button
+        v-if="!roundComplete"
         class="primary"
         type="button"
         data-testid="roll"
@@ -76,6 +113,63 @@
       >
         掷骰
       </button>
+      <div class="history-section">
+        <button
+          type="button"
+          class="secondary"
+          data-testid="toggle-history"
+          @click="showHistory = !showHistory"
+        >
+          {{ showHistory ? '收起' : '历史成绩' }}
+        </button>
+        <template v-if="showHistory">
+          <ul v-if="rounds.length" class="rounds-list">
+            <li
+              v-for="r in rounds"
+              :key="r.round_number"
+              class="round-item"
+            >
+              <button
+                type="button"
+                class="round-btn"
+                :class="{ active: selectedRound === r.round_number }"
+                data-testid="round-link"
+                @click="selectRound(r.round_number)"
+              >
+                第 {{ r.round_number }} 轮 ({{ formatRoundTime(r.started_at) }})
+              </button>
+            </li>
+          </ul>
+          <div v-if="selectedRound !== null && historyResults.length" class="history-ranking">
+            <h3>第 {{ selectedRound }} 轮结果</h3>
+            <table class="ranking-table">
+              <thead>
+                <tr>
+                  <th>名次</th>
+                  <th>用户名</th>
+                  <th>结果</th>
+                  <th>掷骰次数</th>
+                  <th>用时(秒)</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr
+                  v-for="hr in historyResults"
+                  :key="hr.user_id"
+                  data-testid="history-ranking-row"
+                >
+                  <td>{{ hr.rank }}</td>
+                  <td>{{ hr.username }}</td>
+                  <td>{{ hr.won ? '胜利' : '失败' }}</td>
+                  <td>{{ hr.roll_count }}</td>
+                  <td>{{ hr.duration_seconds.toFixed(1) }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p v-else-if="rounds.length === 0" class="no-history">暂无历史轮次</p>
+        </template>
+      </div>
     </template>
   </div>
 </template>
@@ -90,13 +184,24 @@ const route = useRoute();
 const venueId = computed(() => route.params.id as string);
 const venueName = ref('');
 const participants = ref<
-  { user_id: number; username: string; position: number; condition: number; mode: string; won: boolean; game_over: boolean }[]
+  { user_id: number; username: string; position: number; condition: number; mode: string; won: boolean; game_over: boolean; roll_count?: number }[]
+>([]);
+const currentRound = ref(1);
+const roundComplete = ref(false);
+const ranking = ref<
+  { rank: number; user_id: number; username: string; won: boolean; game_over: boolean; roll_count: number; duration_seconds: number }[]
 >([]);
 const loadError = ref('');
 const mode = ref<'normal' | 'super'>('normal');
 const lastDice = ref<number | null>(null);
 const lastSteps = ref<number | null>(null);
 const myUserId = ref<number | null>(null);
+const showHistory = ref(false);
+const rounds = ref<{ round_number: number; started_at: string }[]>([]);
+const selectedRound = ref<number | null>(null);
+const historyResults = ref<
+  { rank: number; user_id: number; username: string; won: boolean; game_over: boolean; roll_count: number; duration_seconds: number }[]
+>([]);
 let pollInterval: ReturnType<typeof setInterval> | null = null;
 
 const trackCells = Array.from({ length: TRACK_LENGTH }, (_, i) => i);
@@ -139,9 +244,51 @@ async function loadVenue() {
   const hadParticipants = participants.value.length > 0;
   venueName.value = data.name;
   participants.value = data.participants;
+  currentRound.value = data.current_round ?? 1;
+  roundComplete.value = data.round_complete ?? false;
+  ranking.value = data.ranking ?? [];
   const m = myUserId.value !== null ? data.participants.find((p: { user_id: number }) => p.user_id === myUserId.value) : null;
   if (m && !hadParticipants) mode.value = m.mode === 'super' ? 'super' : 'normal';
 }
+
+async function onStartNewRace() {
+  const res = await apiFetch(`/venues/${venueId.value}/start_new_race`, { method: 'POST' });
+  if (!res.ok) return;
+  await loadVenue();
+  rounds.value = [];
+  selectedRound.value = null;
+  historyResults.value = [];
+}
+
+function formatRoundTime(iso: string) {
+  if (!iso) return '';
+  try {
+    const d = new Date(iso);
+    return d.toLocaleString('zh-CN', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+  } catch {
+    return iso.slice(0, 16);
+  }
+}
+
+async function loadRounds() {
+  const res = await apiFetch(`/venues/${venueId.value}/rounds`);
+  if (!res.ok) return;
+  rounds.value = await res.json();
+}
+
+async function selectRound(roundNumber: number) {
+  selectedRound.value = roundNumber;
+  const res = await apiFetch(`/venues/${venueId.value}/rounds/${roundNumber}/results`);
+  if (!res.ok) {
+    historyResults.value = [];
+    return;
+  }
+  historyResults.value = await res.json();
+}
+
+watch(showHistory, (visible) => {
+  if (visible && rounds.value.length === 0) loadRounds();
+});
 
 onMounted(async () => {
   if (myUserId.value === null) await loadMe();
@@ -280,5 +427,80 @@ async function onRoll() {
 .primary:disabled {
   opacity: 0.7;
   cursor: not-allowed;
+}
+.ranking-section {
+  margin-bottom: 16px;
+}
+.ranking-title {
+  font-size: 18px;
+  margin: 0 0 10px;
+}
+.ranking-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 12px;
+  font-size: 14px;
+}
+.ranking-table th,
+.ranking-table td {
+  padding: 8px 10px;
+  text-align: left;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+}
+.ranking-table th {
+  font-weight: 700;
+  color: rgba(0, 0, 0, 0.7);
+}
+.ranking-table tr.me {
+  background: rgba(0, 102, 204, 0.08);
+  font-weight: 600;
+}
+.secondary {
+  padding: 8px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  background: rgba(0, 0, 0, 0.04);
+  cursor: pointer;
+  font-weight: 600;
+  margin-top: 16px;
+}
+.history-section {
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+}
+.rounds-list {
+  list-style: none;
+  padding: 0;
+  margin: 10px 0 0;
+}
+.round-item {
+  margin-bottom: 6px;
+}
+.round-btn {
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  background: #fff;
+  cursor: pointer;
+  font-size: 14px;
+  width: 100%;
+  text-align: left;
+}
+.round-btn.active {
+  background: rgba(0, 102, 204, 0.12);
+  border-color: rgba(0, 102, 204, 0.3);
+}
+.history-ranking {
+  margin-top: 12px;
+}
+.history-ranking h3 {
+  font-size: 16px;
+  margin: 0 0 8px;
+}
+.no-history {
+  margin: 10px 0 0;
+  color: rgba(0, 0, 0, 0.5);
+  font-size: 14px;
 }
 </style>

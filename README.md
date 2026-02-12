@@ -71,7 +71,7 @@ nix develop -c pnpm e2e
 Frontend entrypoints:
 - Transcription UI: `http://localhost:3000/`
 - Racing game (single-player): `http://localhost:3000/racing` (Normal: no condition loss; Super: steps = min(dice, condition), 1 condition loss per roll, cannot switch back to Normal)
-- Multiplayer racing: `http://localhost:3000/venues` — register/login, then choose or create a venue; dice from server, track shows all players and usernames
+- Multiplayer racing: `http://localhost:3000/venues` — register/login, choose or create a venue; dice from server, track shows all players. When all finish (win or game over), ranking by fewest rolls then shortest time; start new race to begin next round. History shows past rounds and their results.
 
 **Alternative:** Use `nix develop` or `direnv allow` to enter the environment, then run commands directly.
 

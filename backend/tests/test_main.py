@@ -247,3 +247,100 @@ def test_roll_returns_dice_and_updates_state():
     me = next(p for p in get_r.json()["participants"] if p["username"] == "alice")
     assert me["position"] == data["newPosition"]
     assert me["condition"] == 6
+    assert me["roll_count"] == 1
+    assert get_r.json()["current_round"] == 1
+    assert get_r.json()["round_complete"] is False
+
+
+def test_round_complete_and_ranking_when_single_participant_finishes():
+    """When the only participant wins, round_complete is True and ranking has one entry."""
+    token = _register_and_token()
+    list_r = client.get("/venues", headers={"Authorization": f"Bearer {token}"})
+    venue_id = list_r.json()[0]["id"]
+    client.post(f"/venues/{venue_id}/enter", headers={"Authorization": f"Bearer {token}"})
+    for _ in range(50):
+        r = client.post(
+            f"/venues/{venue_id}/roll",
+            json={"mode": "normal"},
+            headers={"Authorization": f"Bearer {token}"},
+        )
+        if r.status_code != 200:
+            break
+        if r.json().get("won"):
+            break
+    get_r = client.get(f"/venues/{venue_id}", headers={"Authorization": f"Bearer {token}"})
+    assert get_r.status_code == 200
+    data = get_r.json()
+    assert data["round_complete"] is True
+    assert len(data["ranking"]) == 1
+    assert data["ranking"][0]["username"] == "alice"
+    assert data["ranking"][0]["won"] is True
+    assert data["ranking"][0]["rank"] == 1
+
+
+def test_start_new_race_resets_participants():
+    """After round complete, start_new_race resets participants and increments round."""
+    token = _register_and_token()
+    list_r = client.get("/venues", headers={"Authorization": f"Bearer {token}"})
+    venue_id = list_r.json()[0]["id"]
+    client.post(f"/venues/{venue_id}/enter", headers={"Authorization": f"Bearer {token}"})
+    for _ in range(50):
+        r = client.post(
+            f"/venues/{venue_id}/roll",
+            json={"mode": "normal"},
+            headers={"Authorization": f"Bearer {token}"},
+        )
+        if r.status_code != 200 or r.json().get("won"):
+            break
+    get_r = client.get(f"/venues/{venue_id}", headers={"Authorization": f"Bearer {token}"})
+    assert get_r.json()["round_complete"] is True
+    start_r = client.post(
+        f"/venues/{venue_id}/start_new_race",
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    assert start_r.status_code == 200
+    assert start_r.json()["current_round"] == 2
+    get2 = client.get(f"/venues/{venue_id}", headers={"Authorization": f"Bearer {token}"})
+    assert get2.json()["current_round"] == 2
+    assert get2.json()["round_complete"] is False
+    me = next(p for p in get2.json()["participants"] if p["username"] == "alice")
+    assert me["position"] == 0
+    assert me["condition"] == 6
+    assert me["roll_count"] == 0
+
+
+def test_get_rounds_and_round_results():
+    """GET /venues/:id/rounds and GET /venues/:id/rounds/:n/results return history."""
+    token = _register_and_token()
+    list_r = client.get("/venues", headers={"Authorization": f"Bearer {token}"})
+    venue_id = list_r.json()[0]["id"]
+    client.post(f"/venues/{venue_id}/enter", headers={"Authorization": f"Bearer {token}"})
+    for _ in range(50):
+        r = client.post(
+            f"/venues/{venue_id}/roll",
+            json={"mode": "normal"},
+            headers={"Authorization": f"Bearer {token}"},
+        )
+        if r.status_code != 200 or r.json().get("won"):
+            break
+    client.post(
+        f"/venues/{venue_id}/start_new_race",
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    rounds_r = client.get(
+        f"/venues/{venue_id}/rounds",
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    assert rounds_r.status_code == 200
+    rounds = rounds_r.json()
+    assert len(rounds) >= 1
+    assert rounds[0]["round_number"] == 1
+    results_r = client.get(
+        f"/venues/{venue_id}/rounds/1/results",
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    assert results_r.status_code == 200
+    results = results_r.json()
+    assert len(results) == 1
+    assert results[0]["username"] == "alice"
+    assert results[0]["rank"] == 1
