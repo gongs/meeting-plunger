@@ -37,3 +37,90 @@ body {
     background-color: #242424;
   }
 }
+
+/* Shared racing track & car (RacingGame + VenueRoom) */
+.racing-track-wrap {
+  border-radius: 12px;
+  overflow: hidden;
+}
+.racing-track-curb {
+  height: 8px;
+  background: repeating-linear-gradient(
+    90deg,
+    #c00 0,
+    #c00 8px,
+    #fff 8px,
+    #fff 16px
+  );
+}
+.racing-track {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(22, minmax(0, 1fr));
+  grid-auto-rows: 28px;
+  gap: 4px;
+  padding: 10px;
+  background: #3d3d3d;
+}
+.racing-track-center-line {
+  display: none; /* 单行跑道无需中线 */
+}
+.racing-cell {
+  position: relative;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: #4a4a4a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  min-height: 0;
+}
+.racing-cell--start,
+.racing-cell--finish {
+  background-color: #2a2a2a;
+  background-image: linear-gradient(45deg, #fff 25%, transparent 25%),
+    linear-gradient(-45deg, #fff 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, #fff 75%),
+    linear-gradient(-45deg, transparent 75%, #fff 75%);
+  background-size: 6px 6px;
+  background-position: 0 0, 3px 0, 3px -3px, 0 3px;
+}
+.racing-cell--active {
+  border-color: rgba(255, 255, 255, 0.35);
+  background: rgba(255, 255, 255, 0.15);
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.2);
+}
+.racing-cell-label {
+  position: absolute;
+  font-size: 10px;
+  font-weight: 800;
+  color: rgba(0, 0, 0, 0.85);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.racing-cell-index {
+  font-size: 9px;
+  color: rgba(255, 255, 255, 0.5);
+  font-weight: 700;
+}
+.racing-car-icon {
+  width: 14px;
+  height: 9px;
+  background: linear-gradient(180deg, #c0c4c8 0%, #8a8e92 100%);
+  border-radius: 3px 3px 4px 4px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  position: relative;
+}
+.racing-car-icon::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: -1px;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 3px solid transparent;
+  border-right: 3px solid transparent;
+  border-bottom: 4px solid #9a9ea2;
+}

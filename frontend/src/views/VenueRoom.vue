@@ -3,28 +3,43 @@
     <h1 class="title">{{ venueName }}</h1>
     <p v-if="loadError" class="error">{{ loadError }}</p>
     <template v-else>
-      <div class="track" aria-label="Track">
-        <div
-          v-for="i in trackCells"
-          :key="i"
-          class="cell"
-          :class="{ active: isCellActive(i) }"
-          data-testid="track-cell"
-        >
-          <span class="cell-index">{{ i + 1 }}</span>
-        </div>
-        <template v-for="p in participants" :key="p.user_id">
+      <div class="track-wrap racing-track-wrap">
+        <div class="racing-track-curb" aria-hidden="true" />
+        <div class="track racing-track" aria-label="Track">
+          <div class="racing-track-center-line" aria-hidden="true" />
           <div
-            class="car"
-            :class="{ me: p.user_id === myUserId }"
-            :style="carStyle(p.position)"
-            :data-pos="String(p.position)"
-            :data-testid="'car-' + p.username"
+            v-for="i in trackCells"
+            :key="i"
+            class="cell racing-cell"
+            :class="{
+              'racing-cell--active': isCellActive(i),
+              'racing-cell--start': i === 0,
+              'racing-cell--finish': i === trackCells.length - 1,
+            }"
+            :aria-label="
+              i === 0 ? 'Start' : i === trackCells.length - 1 ? 'Finish' : undefined
+            "
+            data-testid="track-cell"
           >
-            <span class="username">{{ p.username }}</span>
-            <span aria-hidden="true">🚗</span>
+            <span v-if="i === 0" class="racing-cell-label">START</span>
+            <span v-else-if="i === trackCells.length - 1" class="racing-cell-label">FINISH</span>
+            <span class="racing-cell-index">{{ i + 1 }}</span>
           </div>
-        </template>
+          <template v-for="p in participants" :key="p.user_id">
+            <div
+              class="car"
+              :class="{ me: p.user_id === myUserId }"
+              :style="carStyle(p.position)"
+              :data-pos="String(p.position)"
+              :data-testid="'car-' + p.username"
+              :aria-label="p.user_id === myUserId ? 'Your car' : `${p.username}'s car`"
+            >
+              <span class="username">{{ p.username }}</span>
+              <span class="racing-car-icon" aria-hidden="true" />
+            </div>
+          </template>
+        </div>
+        <div class="racing-track-curb" aria-hidden="true" />
       </div>
       <div v-if="me" class="my-stats">
         <div class="stat">
@@ -205,12 +220,8 @@ const historyResults = ref<
 let pollInterval: ReturnType<typeof setInterval> | null = null;
 
 const trackCells = Array.from({ length: TRACK_LENGTH }, (_, i) => i);
-const columns = 11;
-
 function carStyle(position: number) {
-  const row = Math.floor(position / columns) + 1;
-  const col = (position % columns) + 1;
-  return { gridRow: String(row), gridColumn: String(col) };
+  return { gridRow: '1', gridColumn: String(position + 1) };
 }
 
 function isCellActive(_i: number) {
@@ -254,6 +265,7 @@ async function loadVenue() {
 async function onStartNewRace() {
   const res = await apiFetch(`/venues/${venueId.value}/start_new_race`, { method: 'POST' });
   if (!res.ok) return;
+  mode.value = 'normal'; /* 新比赛可重新选择 Normal / Super */
   await loadVenue();
   rounds.value = [];
   selectedRound.value = null;
@@ -333,26 +345,8 @@ async function onRoll() {
   color: #c00;
   margin: 0 0 12px;
 }
-.track {
-  display: grid;
-  grid-template-columns: repeat(11, 1fr);
-  gap: 4px;
+.track-wrap {
   margin-bottom: 16px;
-  position: relative;
-}
-.cell {
-  aspect-ratio: 1;
-  border-radius: 8px;
-  background: rgba(0, 0, 0, 0.06);
-  display: grid;
-  place-items: center;
-}
-.cell.active {
-  background: rgba(0, 102, 204, 0.12);
-}
-.cell-index {
-  font-size: 12px;
-  color: rgba(0, 0, 0, 0.55);
 }
 .car {
   position: absolute;

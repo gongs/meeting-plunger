@@ -70,27 +70,40 @@
         {{ lastDamage === null ? '—' : `Damage +${lastDamage}` }}
       </div>
 
-      <div class="track" aria-label="Track">
-        <div
-          v-for="i in trackCells"
-          :key="i"
-          class="cell"
-          :class="{ active: i === carPos }"
-          data-testid="track-cell"
-        >
-          <span class="cell-index">{{ i + 1 }}</span>
+      <div class="track-wrap racing-track-wrap">
+        <div class="racing-track-curb" aria-hidden="true" />
+        <div class="track racing-track" aria-label="Track">
+          <div class="racing-track-center-line" aria-hidden="true" />
+          <div
+            v-for="i in trackCells"
+            :key="i"
+            class="cell racing-cell"
+            :class="{
+              'racing-cell--active': i === carPos,
+              'racing-cell--start': i === 0,
+              'racing-cell--finish': i === trackCells.length - 1,
+            }"
+            :aria-label="
+              i === 0 ? 'Start' : i === trackCells.length - 1 ? 'Finish' : undefined
+            "
+            data-testid="track-cell"
+          >
+            <span v-if="i === 0" class="racing-cell-label">START</span>
+            <span v-else-if="i === trackCells.length - 1" class="racing-cell-label">FINISH</span>
+            <span class="racing-cell-index">{{ i + 1 }}</span>
+          </div>
+          <div
+            class="car"
+            data-testid="car"
+            :data-pos="String(carPos)"
+            :style="carStyle"
+            aria-label="Your car"
+            :class="{ damaged: lastDamage !== null && lastDamage > 0 }"
+          >
+            <span class="racing-car-icon" aria-hidden="true" />
+          </div>
         </div>
-
-        <div
-          class="car"
-          data-testid="car"
-          :data-pos="String(carPos)"
-          :style="carStyle"
-          aria-hidden="true"
-          :class="{ damaged: lastDamage !== null && lastDamage > 0 }"
-        >
-          🚗
-        </div>
+        <div class="racing-track-curb" aria-hidden="true" />
       </div>
 
       <div
@@ -152,10 +165,7 @@ const trackCells = computed(() =>
   Array.from({ length: TRACK_LENGTH }, (_, i) => i)
 );
 const carStyle = computed(() => {
-  const columns = 11;
-  const row = Math.floor(carPos.value / columns) + 1;
-  const col = (carPos.value % columns) + 1;
-  return { gridRow: String(row), gridColumn: String(col) };
+  return { gridRow: '1', gridColumn: String(carPos.value + 1) };
 });
 
 const onRoll = () => {
@@ -297,42 +307,16 @@ const onRestart = () => {
   color: rgba(0, 0, 0, 0.7);
 }
 
-.track {
-  position: relative;
-  display: grid;
-  grid-template-columns: repeat(11, minmax(0, 1fr));
-  gap: 8px;
+.track-wrap {
   margin-bottom: 14px;
-}
-
-.cell {
-  aspect-ratio: 1 / 1;
-  border-radius: 14px;
-  border: 1px solid rgba(0, 0, 0, 0.08);
-  background: rgba(0, 0, 0, 0.02);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.cell.active {
-  border-color: rgba(0, 102, 204, 0.5);
-  background: rgba(0, 102, 204, 0.12);
-}
-
-.cell-index {
-  font-size: 12px;
-  color: rgba(0, 0, 0, 0.55);
-  font-weight: 700;
 }
 
 .car {
   display: grid;
   place-items: center;
-  font-size: 20px;
   line-height: 1;
   pointer-events: none;
-  transform: scaleX(-1); /* 车头水平翻转 */
+  transform: scaleX(-1);
 }
 
 .car.damaged {
@@ -401,19 +385,19 @@ const onRestart = () => {
 
 @keyframes shake {
   0% {
-    transform: translateX(0);
+    transform: scaleX(-1) translateX(0);
   }
   25% {
-    transform: translateX(-2px);
+    transform: scaleX(-1) translateX(-2px);
   }
   50% {
-    transform: translateX(2px);
+    transform: scaleX(-1) translateX(2px);
   }
   75% {
-    transform: translateX(-1px);
+    transform: scaleX(-1) translateX(-1px);
   }
   100% {
-    transform: translateX(0);
+    transform: scaleX(-1) translateX(0);
   }
 }
 </style>
